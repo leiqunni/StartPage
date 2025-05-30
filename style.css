@@ -1,0 +1,251 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0; /* 薄いグレーの背景 */
+    color: #333;
+    overflow-y: auto; /* コンテンツがはみ出したらスクロール */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+    max-width: 960px; /* コンテンツの最大幅を制限 */
+    box-sizing: border-box;
+}
+
+/* --- 検索エリア --- */
+.search-area {
+    margin-bottom: 50px; /* リンクエリアとの間にスペース */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 600px; /* 検索バーの幅 */
+    max-width: 80%;
+    background-color: #fff;
+    border-radius: 24px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 5px 15px;
+}
+
+#google-search-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    padding: 10px 0;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+#search-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    color: #4285F4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#search-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* --- リンクグリッド --- */
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* 120pxのボタンを自動で配置 */
+    gap: 15px; /* ボタン間のスペース */
+    width: 100%;
+    justify-content: center;
+    max-width: calc(120px * 8 + 15px * 7); /* 8個のボタンと7個のギャップの合計幅 */
+}
+
+.link-button {
+    width: 120px;
+    height: 120px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 5px;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative; /* 編集アイコン用 */
+    text-decoration: none; /* リンクの下線を消す */
+    color: #333;
+    overflow: hidden; /* タイトルがはみ出したら隠す */
+}
+
+.link-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+
+.link-button img.icon {
+    width: 64px;
+    height: 64px;
+    object-fit: contain; /* 画像のアスペクト比を維持 */
+    margin-bottom: 5px;
+}
+
+.link-button .title {
+    font-size: 14px;
+    line-height: 1.2;
+    max-height: 3.6em; /* 3行程度に制限 */
+    overflow: hidden;
+    text-overflow: ellipsis; /* はみ出したら... */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 表示する行数 */
+    -webkit-box-orient: vertical;
+    word-break: break-word; /* 長い単語でも改行 */
+}
+
+/* プラスボタン（新規追加用） */
+.add-button {
+    background-color: #e0e0e0;
+    color: #888;
+    font-size: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: #d0d0d0;
+}
+
+/* 編集アイコン */
+.edit-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    padding: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0; /* デフォルトでは非表示 */
+    transition: opacity 0.2s;
+}
+
+.link-button:hover .edit-icon {
+    opacity: 1; /* ホバー時に表示 */
+}
+
+.edit-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+}
+
+/* --- モーダル（ポップアップ） --- */
+.modal {
+    display: none; /* デフォルトでは非表示 */
+    position: fixed; /* 画面全体を覆う */
+    z-index: 1000; /* 他の要素より手前に表示 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4); /* 半透明の黒い背景 */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.modal-content input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.modal-content button {
+    background-color: #4CAF50; /* 保存ボタン */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.modal-content button:hover {
+    opacity: 0.9;
+}
+
+.modal-content .delete-button {
+    background-color: #f44336; /* 削除ボタン */
+}
+
+.modal-content .delete-button:hover {
+    opacity: 0.9;
+}
