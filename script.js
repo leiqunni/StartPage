@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const linksGrid = document.getElementById('links-grid');
     const searchInput = document.getElementById('google-search-input');
     const searchButton = document.getElementById('search-button');
+    const suggestionsBox = document.getElementById('suggestions-box'); // 追加
     const modal = document.getElementById('edit-modal');
     const closeModalButton = modal.querySelector('.close-button');
     const saveLinkButton = document.getElementById('save-link-button');
@@ -12,7 +13,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkIndex = document.getElementById('modal-link-index');
 
     let links = JSON.parse(localStorage.getItem('chromeLinks')) || [];
+    let searchHistory = JSON.parse(localStorage.getItem('chromeSearchHistory')) || []; // 検索履歴
     const MAX_LINKS = 24; // 8x3グリッドの最大数
+    const MAX_SEARCH_HISTORY = 10; // 検索履歴の最大数
+    let currentSelectedSuggestion = -1; // 現在選択されているサジェストのインデックス
+
+    // 簡易的な固定サジェストデータ（本家APIの代わり）
+    const fixedSuggestions = [
+        "今日のニュース", "天気", "株価", "最新のテクノロジー", "おすすめのレストラン",
+        "映画情報", "スポーツニュース", "プログラミング", "旅行先", "レシピ"
+    ];
+
 
     // 既存のリンクデータにclicksプロパティがない場合、初期化する
     links.forEach(link => {
@@ -20,8 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             link.clicks = 0;
         }
     });
-    // ローカルストレージを更新
-    localStorage.setItem('chromeLinks', JSON.stringify(links));
+    localStorage.setItem('chromeLinks', JSON.stringify(links)); // ローカルストレージを更新
 
     // ------------------------------------
     //  リンクの描画
@@ -30,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         linksGrid.innerHTML = ''; // 既存のボタンをクリア
 
         // クリック数が多い順にソート（降順）
-        // 同じクリック数の場合は、現在の並び順（安定ソート）を維持するため、元のインデックスも考慮しない単純なソート
         const sortedLinks = [...links].sort((a, b) => b.clicks - a.clicks);
 
         // 登録されているリンクの描画
@@ -64,10 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (links[index]) { // リンクが存在することを確認
                 links[index].clicks = (links[index].clicks || 0) + 1;
                 localStorage.setItem('chromeLinks', JSON.stringify(links));
-                // クリック後、ソートされた状態を再描画する場合は以下の行を有効にする
-                // renderLinks();
-                // ただし、毎回ソートすると視覚的に動きが激しくなる可能性があるので、
-                // 必要に応じて検討してください。今回はクリック後すぐに再描画はしない。
             }
         });
 
@@ -147,21 +152,140 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
+    //  検索履歴・サジェスト関連
+    // ------------------------------------
+    function saveSearchQuery(query) {
+        if (!query) return;
+        // 既存の履歴があれば削除して最新の位置に移動
+        searchHistory = searchHistory.filter(item => item !== query);
+        // 新しいクエリを先頭に追加
+        searchHistory.unshift(query);
+        // 最大履歴数を超えたら古いものを削除
+        if (searchHistory.length > MAX_SEARCH_HISTORY) {
+            searchHistory = searchHistory.slice(0, MAX_SEARCH_HISTORY);
+        }
+        localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
+    }
+
+    function showSuggestions(query) {
+        suggestionsBox.innerHTML = '';
+        suggestionsBox.classList.remove('visible');
+        currentSelectedSuggestion = -1; // 選択状態をリセット
+
+        const filteredSuggestions = fixedSuggestions.filter(s => s.toLowerCase().includes(query.toLowerCase()));
+        const filteredHistory = searchHistory.filter(h => h.toLowerCase().includes(query.toLowerCase()));
+
+        // 履歴とサジェストを組み合わせる
+        const combinedSuggestions = [];
+
+        // 検索履歴（検索履歴アイコン）
+        filteredHistory.forEach(item => {
+            combinedSuggestions.push({ type: 'history', text: item });
+        });
+
+        // 固定サジェスト（虫眼鏡アイコン）
+        filteredSuggestions.forEach(item => {
+            // 履歴に含まれていないものだけを追加
+            if (!filteredHistory.includes(item)) {
+                combinedSuggestions.push({ type: 'suggestion', text: item });
+            }
+        });
+
+        if (combinedSuggestions.length === 0) {
+            return;
+        }
+
+        combinedSuggestions.forEach((item, index) => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.classList.add('suggestion-item');
+            suggestionItem.dataset.index = index; // データ属性にインデックスを保存
+
+            const iconSvg = item.type === 'history' ?
+                '<svg class="icon-history" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C8.28 19.99 10.04 20.72 12 20.72c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>' :
+                '<svg class="icon-search" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+
+            suggestionItem.innerHTML = iconSvg + item.text;
+            suggestionItem.addEventListener('click', () => {
+                searchInput.value = item.text;
+                suggestionsBox.classList.remove('visible');
+                searchButton.click(); // 選択されたサジェストで検索を実行
+            });
+            suggestionsBox.appendChild(suggestionItem);
+        });
+
+        suggestionsBox.classList.add('visible');
+    }
+
+    function hideSuggestions() {
+        suggestionsBox.classList.remove('visible');
+    }
+
+    // ------------------------------------
     //  イベントリスナー
     // ------------------------------------
     // Google検索ボタン
     searchButton.addEventListener('click', () => {
-        const query = searchInput.value;
+        const query = searchInput.value.trim();
         if (query) {
+            saveSearchQuery(query); // 検索履歴を保存
             window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
         }
+        hideSuggestions(); // 検索実行後にサジェストを隠す
     });
 
     // Enterキーで検索
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
+            if (currentSelectedSuggestion > -1) {
+                // サジェストが選択されている場合、そのテキストで検索
+                const selectedText = suggestionsBox.children[currentSelectedSuggestion].textContent.replace(/^\s*\S+\s*/, ''); // アイコンSVGを削除
+                searchInput.value = selectedText;
+            }
             searchButton.click();
         }
+    });
+
+    // 検索入力時のイベント
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim();
+        if (query.length > 0) {
+            showSuggestions(query);
+        } else {
+            hideSuggestions();
+        }
+    });
+
+    // キーボードの上下矢印でサジェスト選択
+    searchInput.addEventListener('keydown', (e) => {
+        const items = suggestionsBox.children;
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault(); // カーソル移動を防ぐ
+            if (currentSelectedSuggestion < items.length - 1) {
+                if (currentSelectedSuggestion > -1) {
+                    items[currentSelectedSuggestion].classList.remove('selected');
+                }
+                currentSelectedSuggestion++;
+                items[currentSelectedSuggestion].classList.add('selected');
+                searchInput.value = items[currentSelectedSuggestion].textContent.replace(/^\s*\S+\s*/, ''); // アイコンSVGを削除
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault(); // カーソル移動を防ぐ
+            if (currentSelectedSuggestion > 0) {
+                if (currentSelectedSuggestion > -1) {
+                    items[currentSelectedSuggestion].classList.remove('selected');
+                }
+                currentSelectedSuggestion--;
+                items[currentSelectedSuggestion].classList.add('selected');
+                searchInput.value = items[currentSelectedSuggestion].textContent.replace(/^\s*\S+\s*/, ''); // アイコンSVGを削除
+            }
+        }
+    });
+
+    // input要素からフォーカスが外れたらサジェストを隠す（少し遅延させてクリックできるようにする）
+    searchInput.addEventListener('blur', () => {
+        setTimeout(hideSuggestions, 150);
     });
 
     // モーダルを閉じるボタン

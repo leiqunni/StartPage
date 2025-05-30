@@ -25,7 +25,9 @@ body {
     margin-bottom: 50px; /* リンクエリアとの間にスペース */
     width: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* 検索バーとサジェストを縦に並べる */
+    align-items: center;
+    position: relative; /* サジェストボックスの配置基準 */
 }
 
 .search-input-wrapper {
@@ -37,6 +39,7 @@ body {
     border-radius: 24px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     padding: 5px 15px;
+    z-index: 10; /* サジェストより手前に表示 */
 }
 
 #google-search-input {
@@ -62,6 +65,47 @@ body {
 #search-button svg {
     width: 24px;
     height: 24px;
+}
+
+/* --- 検索候補ボックス --- */
+.suggestions-box {
+    position: absolute;
+    top: calc(100% + 5px); /* search-areaのすぐ下に配置 */
+    width: 600px; /* 検索バーと同じ幅 */
+    max-width: 80%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow: hidden; /* 角丸に合わせて内容を隠す */
+    z-index: 9; /* 検索バーより奥 */
+    display: none; /* デフォルトは非表示 */
+}
+
+.suggestions-box.visible {
+    display: block; /* 表示時にflexではなくblockにする */
+}
+
+.suggestion-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected { /* キーボード選択時 */
+    background-color: #e8e8e8;
+}
+
+.suggestion-item .icon-history,
+.suggestion-item .icon-search {
+    margin-right: 10px;
+    color: #666; /* アイコンの色 */
 }
 
 /* --- リンクグリッド --- */
