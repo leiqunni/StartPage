@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('google-search-input');
     const searchButton = document.getElementById('search-button');
     const suggestionsBox = document.getElementById('suggestions-box');
-    const modal = document.getElementById('edit-modal');
-    const closeModalButton = modal.querySelector('.close-button');
+    const editModal = document.getElementById('edit-modal'); // Renamed for clarity
+    const closeModalButton = editModal.querySelector('.close-button');
     const saveLinkButton = document.getElementById('save-link-button');
     const deleteLinkButton = document.getElementById('delete-link-button');
     const modalLinkUrl = document.getElementById('modal-link-url');
@@ -12,9 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkIcon = document.getElementById('modal-link-icon');
     const modalLinkIndex = document.getElementById('modal-link-index');
 
+    // New elements for settings modal
+    const settingsButton = document.getElementById('settings-button');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsButton = document.getElementById('close-settings-button');
+    const linksPerRowInput = document.getElementById('links-per-row');
+    const numberOfRowsInput = document.getElementById('number-of-rows');
+    const saveSettingsButton = document.getElementById('save-settings-button');
+    const exportDataButton = document.getElementById('export-data-button');
+    const importDataButton = document.getElementById('import-data-button');
+    const importFileInput = document.getElementById('import-file-input');
+
     let links = JSON.parse(localStorage.getItem('chromeLinks')) || [];
     let searchHistory = JSON.parse(localStorage.getItem('chromeSearchHistory')) || [];
-    const MAX_LINKS = 24; // 8x3グリッドの最大数
+
+    // Load settings or set defaults
+    let linksPerRow = parseInt(localStorage.getItem('linksPerRow')) || 8;
+    let numberOfRows = parseInt(localStorage.getItem('numberOfRows')) || 3;
+    let MAX_LINKS = linksPerRow * numberOfRows; // Derived from settings
+
     const MAX_SEARCH_HISTORY = 10; // 検索履歴の最大数
     let currentSelectedSuggestion = -1; // 現在選択されているサジェストのインデックス
 
@@ -38,11 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------
     function renderLinks() {
         linksGrid.innerHTML = '';
+        linksGrid.style.gridTemplateColumns = `repeat(${linksPerRow}, minmax(120px, 1fr))`;
+        MAX_LINKS = linksPerRow * numberOfRows; // Update MAX_LINKS when rendering
 
         // クリック数が多い順にソート（降順）
         const sortedLinks = [...links].sort((a, b) => b.clicks - a.clicks);
 
-        sortedLinks.forEach((link, index) => {
+        sortedLinks.slice(0, MAX_LINKS).forEach((link, index) => {
             const originalIndex = links.findIndex(l => l === link);
             const linkButton = createLinkButton(link, originalIndex);
             linksGrid.appendChild(linkButton);
@@ -53,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addButton.classList.add('link-button', 'add-button');
             addButton.innerHTML = '+';
             addButton.addEventListener('click', () => {
-                openModalForNewLink();
+                openEditModalForNewLink();
             });
             linksGrid.appendChild(addButton);
         }
@@ -95,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editIcon.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            openModalForEditing(index);
+            openEditModalForEditing(index);
         });
 
         linkButton.appendChild(iconImg);
@@ -106,20 +124,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  モーダル関連
+    //  編集モーダル関連
     // ------------------------------------
-    function openModal() {
-        modal.style.display = 'flex';
-        // モーダルを開いたときに、最初の入力フィールドにフォーカス
+    function openEditModal() {
+        editModal.style.display = 'flex';
         modalLinkUrl.focus();
     }
 
-    function closeModal() {
-        modal.style.display = 'none';
-        resetModalForm();
+    function closeEditModal() {
+        editModal.style.display = 'none';
+        resetEditModalForm();
     }
 
-    function resetModalForm() {
+    function resetEditModalForm() {
         modalLinkUrl.value = '';
         modalLinkTitle.value = '';
         modalLinkIcon.value = '';
@@ -127,14 +144,14 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteLinkButton.style.display = 'none';
     }
 
-    function openModalForNewLink() {
-        resetModalForm();
+    function openEditModalForNewLink() {
+        resetEditModalForm();
         deleteLinkButton.style.display = 'none';
-        modal.querySelector('h2').textContent = '新しいリンクを追加';
-        openModal();
+        editModal.querySelector('h2').textContent = '新しいリンクを追加';
+        openEditModal();
     }
 
-    function openModalForEditing(index) {
+    function openEditModalForEditing(index) {
         const link = links[index];
         if (link) {
             modalLinkUrl.value = link.url;
@@ -142,9 +159,22 @@ document.addEventListener('DOMContentLoaded', () => {
             modalLinkIcon.value = link.icon || '';
             modalLinkIndex.value = index;
             deleteLinkButton.style.display = 'inline-block';
-            modal.querySelector('h2').textContent = 'リンクを編集';
-            openModal();
+            editModal.querySelector('h2').textContent = 'リンクを編集';
+            openEditModal();
         }
+    }
+
+    // ------------------------------------
+    //  設定モーダル関連
+    // ------------------------------------
+    function openSettingsModal() {
+        settingsModal.style.display = 'flex';
+        linksPerRowInput.value = linksPerRow;
+        numberOfRowsInput.value = numberOfRows;
+    }
+
+    function closeSettingsModal() {
+        settingsModal.style.display = 'none';
     }
 
     // ------------------------------------
@@ -170,27 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showSuggestions(searchInput.value.trim());
     }
 
-    // Google Custom Search APIなどを使用する場合の例（CORSとAPIキー設定が必要）
-    // async function fetchGoogleSuggestions(query) {
-    //     // ここにあなたのGoogle Custom Search APIキーとカスタム検索IDを設定
-    //     const API_KEY = 'YOUR_GOOGLE_API_KEY';
-    //     const CX = 'YOUR_CUSTOM_SEARCH_ENGINE_ID';
-    //     const url = `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${CX}&q=${encodeURIComponent(query)}`;
-
-    //     try {
-    //         const response = await fetch(url);
-    //         const data = await response.json();
-    //         // data.items からサジェスト候補を抽出して返す
-    //         // このAPIは検索結果を返すため、サジェストには適さない場合があります。
-    //         // 実際のサジェストAPIはGoogle Suggest APIなどですが、公式には公開されていません。
-    //         // そのため、プロキシサーバーを介して非公式APIを利用するか、Bing Suggestions APIなどの他のAPIを検討する必要があります。
-    //         return []; // デモでは空を返します
-    //     } catch (error) {
-    //         console.error('Failed to fetch suggestions from Google API:', error);
-    //         return [];
-    //     }
-    // }
-
     async function showSuggestions(query) {
         suggestionsBox.innerHTML = '';
         suggestionsBox.classList.remove('visible');
@@ -213,14 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
             combinedSuggestions.push({ type: 'suggestion', text: item });
         });
 
-        // オプション: 外部APIからのサジェストを結合する場合
-        // const apiSuggestions = await fetchGoogleSuggestions(query); // ここを有効にする場合
-        // apiSuggestions.forEach(item => {
-        //     if (!combinedSuggestions.some(s => s.text === item)) { // 重複を避ける
-        //         combinedSuggestions.push({ type: 'suggestion', text: item });
-        //     }
-        // });
-
         if (combinedSuggestions.length === 0) {
             return;
         }
@@ -238,11 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
             textSpan.classList.add('text-content');
             textSpan.textContent = item.text;
 
-            suggestionItem.appendChild(DOMParser.parseFromString(iconSvg, 'image/svg+xml').documentElement); // SVGをDOMとして追加
+            suggestionItem.appendChild(DOMParser.parseFromString(iconSvg, 'image/svg+xml').documentElement);
             suggestionItem.appendChild(textSpan);
 
             suggestionItem.addEventListener('click', (e) => {
-                // 削除ボタンがクリックされた場合は処理をスキップ
                 if (e.target.classList.contains('delete-history-btn') || e.target.closest('.delete-history-btn')) {
                     return;
                 }
@@ -251,14 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 searchButton.click();
             });
 
-            // 履歴の場合のみ削除ボタンを追加
             if (item.type === 'history') {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.classList.add('delete-history-btn');
-                deleteBtn.innerHTML = '&times;'; // ×マーク
+                deleteBtn.innerHTML = '&times;';
                 deleteBtn.title = '履歴から削除';
                 deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // suggestionItemへのクリックイベントを停止
+                    e.stopPropagation();
                     deleteSearchQuery(item.text);
                 });
                 suggestionItem.appendChild(deleteBtn);
@@ -271,7 +270,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function hideSuggestions() {
         suggestionsBox.classList.remove('visible');
-        currentSelectedSuggestion = -1; // 選択状態をリセット
+        currentSelectedSuggestion = -1;
+    }
+
+    // ------------------------------------
+    //  データインポート・エクスポート
+    // ------------------------------------
+    function exportData() {
+        const dataToExport = {
+            links: links,
+            searchHistory: searchHistory,
+            settings: {
+                linksPerRow: linksPerRow,
+                numberOfRows: numberOfRows
+            }
+        };
+        const dataStr = JSON.stringify(dataToExport, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'chrome_new_tab_data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (importedData.links && Array.isArray(importedData.links) &&
+                    importedData.searchHistory && Array.isArray(importedData.searchHistory) &&
+                    importedData.settings && typeof importedData.settings === 'object') {
+
+                    links = importedData.links;
+                    searchHistory = importedData.searchHistory;
+                    linksPerRow = importedData.settings.linksPerRow || 8;
+                    numberOfRows = importedData.settings.numberOfRows || 3;
+
+                    localStorage.setItem('chromeLinks', JSON.stringify(links));
+                    localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
+                    localStorage.setItem('linksPerRow', linksPerRow);
+                    localStorage.setItem('numberOfRows', numberOfRows);
+
+                    alert('データが正常にインポートされました。');
+                    renderLinks();
+                    closeSettingsModal();
+                } else {
+                    alert('インポートされたJSONの形式が正しくありません。');
+                }
+            } catch (error) {
+                alert('JSONファイルの解析に失敗しました。ファイルが破損しているか、不正な形式です。');
+                console.error('Import error:', error);
+            }
+        };
+        reader.readAsText(file);
+        // Clear the file input after reading
+        event.target.value = '';
     }
 
     // ------------------------------------
@@ -324,29 +386,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentSelectedSuggestion--;
                 items[currentSelectedSuggestion].classList.add('selected');
                 searchInput.value = items[currentSelectedSuggestion].querySelector('.text-content').textContent;
-            } else if (currentSelectedSuggestion === 0) { // 最初の要素から上に移動すると入力フィールドに戻る
+            } else if (currentSelectedSuggestion === 0) {
                 items[currentSelectedSuggestion].classList.remove('selected');
                 currentSelectedSuggestion = -1;
-                searchInput.value = searchInput.dataset.originalValue || ''; // 元の入力値に戻す
+                searchInput.value = searchInput.dataset.originalValue || '';
             }
         }
     });
 
-    // input要素にフォーカスがあたったときに現在の値を保存
     searchInput.addEventListener('focus', () => {
         searchInput.dataset.originalValue = searchInput.value;
-        showSuggestions(searchInput.value.trim()); // フォーカス時にもサジェストを表示
+        showSuggestions(searchInput.value.trim());
     });
 
     searchInput.addEventListener('blur', () => {
-        setTimeout(hideSuggestions, 150); // わずかに遅延させてクリック可能にする
+        setTimeout(hideSuggestions, 150);
     });
 
-    closeModalButton.addEventListener('click', closeModal);
+    closeModalButton.addEventListener('click', closeEditModal);
 
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
+    editModal.addEventListener('click', (e) => {
+        if (e.target === editModal) {
+            closeEditModal();
         }
     });
 
@@ -365,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (links.length < MAX_LINKS) {
                 links.push({ url, title, icon, clicks: 0 });
             } else {
-                alert('リンクの最大数に達しました。');
+                alert('リンクの最大数に達しました。設定で表示数を増やせます。');
             }
         } else {
             const existingLink = links[parseInt(index)];
@@ -379,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         localStorage.setItem('chromeLinks', JSON.stringify(links));
         renderLinks();
-        closeModal();
+        closeEditModal();
     });
 
     deleteLinkButton.addEventListener('click', () => {
@@ -388,9 +449,49 @@ document.addEventListener('DOMContentLoaded', () => {
             links.splice(index, 1);
             localStorage.setItem('chromeLinks', JSON.stringify(links));
             renderLinks();
-            closeModal();
+            closeEditModal();
         }
     });
 
-    renderLinks();
+    // Settings modal event listeners
+    settingsButton.addEventListener('click', openSettingsModal);
+    closeSettingsButton.addEventListener('click', closeSettingsModal);
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+            closeSettingsModal();
+        }
+    });
+
+    saveSettingsButton.addEventListener('click', () => {
+        const newLinksPerRow = parseInt(linksPerRowInput.value);
+        const newNumberOfRows = parseInt(numberOfRowsInput.value);
+
+        if (isNaN(newLinksPerRow) || newLinksPerRow < 1 || newLinksPerRow > 10) {
+            alert('1行あたりのリンク数は1から10の間の数値を入力してください。');
+            return;
+        }
+        if (isNaN(newNumberOfRows) || newNumberOfRows < 1 || newNumberOfRows > 5) {
+            alert('行数は1から5の間の数値を入力してください。');
+            return;
+        }
+
+        linksPerRow = newLinksPerRow;
+        numberOfRows = newNumberOfRows;
+        localStorage.setItem('linksPerRow', linksPerRow);
+        localStorage.setItem('numberOfRows', numberOfRows);
+
+        alert('設定が保存されました。');
+        renderLinks(); // Re-render links with new settings
+        closeSettingsModal();
+    });
+
+    exportDataButton.addEventListener('click', exportData);
+
+    importDataButton.addEventListener('click', () => {
+        importFileInput.click(); // Trigger the hidden file input click
+    });
+
+    importFileInput.addEventListener('change', importData);
+
+    renderLinks(); // Initial render
 });

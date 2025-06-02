@@ -43,6 +43,25 @@ body {
     fill: currentColor;
 }
 
+/* Settings button specific styles */
+.settings-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+    color: #5f6368;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.settings-button:hover {
+    background-color: #e8e8e8;
+}
+
 
 .container {
     display: flex;
@@ -171,11 +190,11 @@ body {
 /* --- リンクグリッド --- */
 .links-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    /* grid-template-columns will be set by JavaScript based on linksPerRow */
     gap: 15px;
     width: 100%;
     justify-content: center;
-    max-width: calc(120px * 8 + 15px * 7);
+    max-width: calc(120px * 10 + 15px * 9); /* Max for 10 columns for responsiveness */
 }
 
 .link-button {
@@ -321,7 +340,8 @@ body {
     font-size: 14px;
 }
 
-.modal-content input[type="text"] {
+.modal-content input[type="text"],
+.modal-content input[type="number"] { /* Added number input type */
     width: calc(100% - 22px); /* パディングとボーダーを考慮 */
     padding: 10px;
     margin-bottom: 15px;
@@ -336,6 +356,18 @@ body {
     justify-content: flex-end; /* ボタンを右寄せ */
     gap: 10px;
     margin-top: 20px;
+}
+
+.data-management-buttons {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 10px;
+    margin-top: 20px;
+    align-items: stretch; /* Stretch buttons to full width */
+}
+
+.data-management-buttons button {
+    width: 100%; /* Full width for data management buttons */
 }
 
 .modal-content button {
