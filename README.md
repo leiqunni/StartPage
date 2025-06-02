@@ -36,3 +36,30 @@ A customizable new tab page for your browser, allowing you to quickly access you
 * JavaScript
 
 ### Project Structure
+
+.
+„¥„Ÿ„Ÿ index.html            // Main HTML file
+„¥„Ÿ„Ÿ style.css             // Stylesheet for the new tab page
+„¥„Ÿ„Ÿ script.js             // JavaScript for functionality (link management, search, settings)
+„¥„Ÿ„Ÿ lang-en.json          // English translations
+„¥„Ÿ„Ÿ lang-ja.json          // Japanese translations
+„¥„Ÿ„Ÿ lang-zh-Hant.json     // Traditional Chinese translations
+„¤„Ÿ„Ÿ README.md             // This README file (English)
+„¤„Ÿ„Ÿ README.ja.md          // This README file (Japanese)
+
+### Adding New Languages
+
+To add support for a new language:
+
+1.  Create a new `lang-xx.json` file (e.g., `lang-fr.json` for French) in the project root.
+2.  Copy the content from an existing language file (e.g., `lang-en.json`) and translate the values.
+3.  Add a new `<option>` to the `language-selector` in `index.html` with the `value` set to your language code (e.g., `fr`) and the display text for the language.
+4.  Ensure all new translation keys are present in your new language file.
+
+## Contributing
+
+Contributions are welcome! If you have suggestions for improvements or new features, please open an issue or submit a pull request.
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
