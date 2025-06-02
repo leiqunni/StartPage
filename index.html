@@ -8,13 +8,28 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234285F4' d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z'/%3E%3Cpath fill='%23FBBC05' d='M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z'/%3E%3Cpath fill='%23EA4335' d='M12 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z'/%3E%3Cpath fill='%2334A853' d='M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z'/%3E%3C/svg%3E" type="image/svg+xml">
 </head>
 <body>
+    <div class="header-links">
+        <a href="https://mail.google.com/" target="_blank" class="header-link">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+            Gmail
+        </a>
+        <a href="https://images.google.com/" target="_blank" class="header-link">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+            </svg>
+            画像検索
+        </a>
+    </div>
+
     <div class="container">
         <div class="search-area">
             <div class="search-input-wrapper">
                 <input type="search" id="google-search-input" placeholder="ここに入力してGoogle検索" autocomplete="off">
                 <button id="search-button">
-                    <svg viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
                     </svg>
                 </button>
             </div>
@@ -36,8 +51,10 @@
             <input type="text" id="modal-link-title" placeholder="サイト名">
             <label for="modal-link-icon">アイコンURL (任意):</label>
             <input type="text" id="modal-link-icon" placeholder="https://example.com/favicon.ico または SVGデータ">
-            <button id="save-link-button">保存</button>
-            <button id="delete-link-button" class="delete-button">削除</button>
+            <div class="modal-buttons">
+                <button id="save-link-button">保存</button>
+                <button id="delete-link-button" class="delete-button">削除</button>
+            </div>
         </div>
     </div>
 

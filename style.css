@@ -2,13 +2,47 @@ body {
     margin: 0;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* 全体を縦方向に配置 */
+    justify-content: flex-start; /* 上寄せ */
     align-items: center;
     min-height: 100vh;
     background-color: #f0f0f0; /* 薄いグレーの背景 */
     color: #333;
-    overflow-y: auto; /* コンテンツがはみ出したらスクロール */
+    overflow-y: auto;
 }
+
+/* --- ヘッダーリンク --- */
+.header-links {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 15px;
+    z-index: 20; /* 最前面に表示 */
+}
+
+.header-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: #5f6368;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+}
+
+.header-link:hover {
+    background-color: #e8e8e8;
+}
+
+.header-link svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
 
 .container {
     display: flex;
@@ -18,28 +52,29 @@ body {
     width: 100%;
     max-width: 960px; /* コンテンツの最大幅を制限 */
     box-sizing: border-box;
+    margin-top: 80px; /* ヘッダーリンクとのスペース */
 }
 
 /* --- 検索エリア --- */
 .search-area {
-    margin-bottom: 50px; /* リンクエリアとの間にスペース */
+    margin-bottom: 50px;
     width: 100%;
     display: flex;
-    flex-direction: column; /* 検索バーとサジェストを縦に並べる */
+    flex-direction: column;
     align-items: center;
-    position: relative; /* サジェストボックスの配置基準 */
+    position: relative;
 }
 
 .search-input-wrapper {
     display: flex;
     align-items: center;
-    width: 600px; /* 検索バーの幅 */
+    width: 600px;
     max-width: 80%;
     background-color: #fff;
     border-radius: 24px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     padding: 5px 15px;
-    z-index: 10; /* サジェストより手前に表示 */
+    z-index: 10;
 }
 
 #google-search-input {
@@ -70,8 +105,8 @@ body {
 /* --- 検索候補ボックス --- */
 .suggestions-box {
     position: absolute;
-    top: calc(100% + 5px); /* search-areaのすぐ下に配置 */
-    width: 600px; /* 検索バーと同じ幅 */
+    top: calc(100% + 5px);
+    width: 600px;
     max-width: 80%;
     background-color: #fff;
     border-radius: 8px;
@@ -79,13 +114,13 @@ body {
     list-style: none;
     padding: 0;
     margin: 0;
-    overflow: hidden; /* 角丸に合わせて内容を隠す */
-    z-index: 9; /* 検索バーより奥 */
-    display: none; /* デフォルトは非表示 */
+    overflow: hidden;
+    z-index: 9;
+    display: none;
 }
 
 .suggestions-box.visible {
-    display: block; /* 表示時にflexではなくblockにする */
+    display: block;
 }
 
 .suggestion-item {
@@ -95,27 +130,52 @@ body {
     align-items: center;
     font-size: 16px;
     color: #333;
+    position: relative;
 }
 
 .suggestion-item:hover,
-.suggestion-item.selected { /* キーボード選択時 */
+.suggestion-item.selected {
     background-color: #e8e8e8;
+}
+
+.suggestion-item .text-content {
+    flex-grow: 1; /* テキストが削除ボタンの邪魔をしないように */
 }
 
 .suggestion-item .icon-history,
 .suggestion-item .icon-search {
     margin-right: 10px;
-    color: #666; /* アイコンの色 */
+    color: #666;
+    flex-shrink: 0; /* アイコンが縮まないように */
+}
+
+.suggestion-item .delete-history-btn {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    margin-left: 10px;
+    line-height: 1;
+    display: none; /* デフォルトは非表示 */
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.suggestion-item:hover .delete-history-btn {
+    display: block; /* ホバー時に表示 */
+    opacity: 1;
 }
 
 /* --- リンクグリッド --- */
 .links-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* 120pxのボタンを自動で配置 */
-    gap: 15px; /* ボタン間のスペース */
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
     width: 100%;
     justify-content: center;
-    max-width: calc(120px * 8 + 15px * 7); /* 8個のボタンと7個のギャップの合計幅 */
+    max-width: calc(120px * 8 + 15px * 7);
 }
 
 .link-button {
@@ -132,10 +192,10 @@ body {
     box-sizing: border-box;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: transform 0.2s, box-shadow 0.2s;
-    position: relative; /* 編集アイコン用 */
-    text-decoration: none; /* リンクの下線を消す */
+    position: relative;
+    text-decoration: none;
     color: #333;
-    overflow: hidden; /* タイトルがはみ出したら隠す */
+    overflow: hidden;
 }
 
 .link-button:hover {
@@ -147,23 +207,22 @@ body {
 .link-button img.icon {
     width: 64px;
     height: 64px;
-    object-fit: contain; /* 画像のアスペクト比を維持 */
+    object-fit: contain;
     margin-bottom: 5px;
 }
 
 .link-button .title {
     font-size: 14px;
     line-height: 1.2;
-    max-height: 3.6em; /* 3行程度に制限 */
+    max-height: 3.6em;
     overflow: hidden;
-    text-overflow: ellipsis; /* はみ出したら... */
+    text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* 表示する行数 */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-    word-break: break-word; /* 長い単語でも改行 */
+    word-break: break-word;
 }
 
-/* プラスボタン（新規追加用） */
 .add-button {
     background-color: #e0e0e0;
     color: #888;
@@ -178,7 +237,6 @@ body {
     background-color: #d0d0d0;
 }
 
-/* 編集アイコン */
 .edit-icon {
     position: absolute;
     top: 5px;
@@ -190,12 +248,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0; /* デフォルトでは非表示 */
+    opacity: 0;
     transition: opacity 0.2s;
 }
 
 .link-button:hover .edit-icon {
-    opacity: 1; /* ホバー時に表示 */
+    opacity: 1;
 }
 
 .edit-icon svg {
@@ -206,15 +264,15 @@ body {
 
 /* --- モーダル（ポップアップ） --- */
 .modal {
-    display: none; /* デフォルトでは非表示 */
-    position: fixed; /* 画面全体を覆う */
-    z-index: 1000; /* 他の要素より手前に表示 */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.4); /* 半透明の黒い背景 */
+    background-color: rgba(0,0,0,0.4);
     justify-content: center;
     align-items: center;
 }
@@ -228,16 +286,17 @@ body {
     width: 90%;
     max-width: 400px;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .close-button {
     color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
     position: absolute;
     top: 10px;
     right: 15px;
+    font-size: 28px;
+    font-weight: bold;
     cursor: pointer;
 }
 
@@ -245,13 +304,13 @@ body {
 .close-button:focus {
     color: black;
     text-decoration: none;
-    cursor: pointer;
 }
 
 .modal-content h2 {
     margin-top: 0;
     margin-bottom: 20px;
     color: #333;
+    text-align: center;
 }
 
 .modal-content label {
@@ -259,37 +318,45 @@ body {
     margin-bottom: 5px;
     font-weight: bold;
     color: #555;
+    font-size: 14px;
 }
 
 .modal-content input[type="text"] {
-    width: calc(100% - 20px);
+    width: calc(100% - 22px); /* パディングとボーダーを考慮 */
     padding: 10px;
     margin-bottom: 15px;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end; /* ボタンを右寄せ */
+    gap: 10px;
+    margin-top: 20px;
 }
 
 .modal-content button {
-    background-color: #4CAF50; /* 保存ボタン */
+    background-color: #4285F4; /* Google Blue */
     color: white;
-    padding: 10px 15px;
+    padding: 10px 18px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-    margin-right: 10px;
+    font-size: 15px;
+    transition: background-color 0.2s;
 }
 
 .modal-content button:hover {
-    opacity: 0.9;
+    background-color: #3367D6; /* 少し濃いGoogle Blue */
 }
 
 .modal-content .delete-button {
-    background-color: #f44336; /* 削除ボタン */
+    background-color: #EA4335; /* Google Red */
 }
 
 .modal-content .delete-button:hover {
-    opacity: 0.9;
+    background-color: #D93025; /* 少し濃いGoogle Red */
 }
