@@ -420,17 +420,4 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 15px;
-    transition: background-color 0.2s;
-}
-
-.modal-content button:hover {
-    background-color: #3367D6;
-}
-
-.modal-content .delete-button {
-    background-color: #EA4335;
-}
-
-.modal-content .delete-button:hover {
-    background-color: #D93025;
-}
+    transition:

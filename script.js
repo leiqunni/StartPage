@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkTitle = document.getElementById('modal-link-title');
     const modalLinkIcon = document.getElementById('modal-link-icon');
     const modalLinkIndex = document.getElementById('modal-link-index');
-    const fetchTitleButton = document.getElementById('fetch-title-button'); // New element
+    const fetchTitleButton = document.getElementById('fetch-title-button');
 
     // New elements for settings modal
     const settingsButton = document.getElementById('settings-button');
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSettingsButton = document.getElementById('close-settings-button');
     const linksPerRowInput = document.getElementById('links-per-row');
     const numberOfRowsInput = document.getElementById('number-of-rows');
+    const sortByClicksCheckbox = document.getElementById('sort-by-clicks-checkbox'); // New element
     const saveSettingsButton = document.getElementById('save-settings-button');
     const exportDataButton = document.getElementById('export-data-button');
     const importDataButton = document.getElementById('import-data-button');
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load settings or set defaults
     let linksPerRow = parseInt(localStorage.getItem('linksPerRow')) || 8;
     let numberOfRows = parseInt(localStorage.getItem('numberOfRows')) || 3;
+    let sortByClicksEnabled = (localStorage.getItem('sortByClicksEnabled') === 'true'); // New setting
     let MAX_LINKS = linksPerRow * numberOfRows; // Derived from settings
 
     const MAX_SEARCH_HISTORY = 10; // 検索履歴の最大数
@@ -58,11 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
         linksGrid.style.gridTemplateColumns = `repeat(${linksPerRow}, minmax(120px, 1fr))`;
         MAX_LINKS = linksPerRow * numberOfRows; // Update MAX_LINKS when rendering
 
-        // クリック数が多い順にソート（降順）
-        const sortedLinks = [...links].sort((a, b) => b.clicks - a.clicks);
+        let linksToDisplay = [...links]; // Create a copy to sort
 
-        sortedLinks.slice(0, MAX_LINKS).forEach((link, index) => {
-            const originalIndex = links.findIndex(l => l === link);
+        // クリック数でソートする設定が有効な場合
+        if (sortByClicksEnabled) {
+            linksToDisplay.sort((a, b) => b.clicks - a.clicks);
+        }
+
+        linksToDisplay.slice(0, MAX_LINKS).forEach((link) => {
+            // Find the original index to update clicks correctly
+            const originalIndex = links.findIndex(l => l.url === link.url && l.title === link.title);
             const linkButton = createLinkButton(link, originalIndex);
             linksGrid.appendChild(linkButton);
         });
@@ -85,7 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
         linkButton.target = '_blank';
 
         linkButton.addEventListener('click', (e) => {
-            if (links[index]) {
+            // Ensure index is valid and link exists before updating clicks
+            if (index !== -1 && links[index]) {
                 links[index].clicks = (links[index].clicks || 0) + 1;
                 localStorage.setItem('chromeLinks', JSON.stringify(links));
             }
@@ -172,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsModal.style.display = 'flex';
         linksPerRowInput.value = linksPerRow;
         numberOfRowsInput.value = numberOfRows;
+        sortByClicksCheckbox.checked = sortByClicksEnabled; // Set checkbox state
     }
 
     function closeSettingsModal() {
@@ -283,7 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
             searchHistory: searchHistory,
             settings: {
                 linksPerRow: linksPerRow,
-                numberOfRows: numberOfRows
+                numberOfRows: numberOfRows,
+                sortByClicksEnabled: sortByClicksEnabled // Include new setting
             }
         };
         const dataStr = JSON.stringify(dataToExport, null, 2);
@@ -315,11 +325,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     searchHistory = importedData.searchHistory;
                     linksPerRow = importedData.settings.linksPerRow || 8;
                     numberOfRows = importedData.settings.numberOfRows || 3;
+                    // Ensure boolean value for sortByClicksEnabled
+                    sortByClicksEnabled = (importedData.settings.sortByClicksEnabled === true);
+
 
                     localStorage.setItem('chromeLinks', JSON.stringify(links));
                     localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
                     localStorage.setItem('linksPerRow', linksPerRow);
                     localStorage.setItem('numberOfRows', numberOfRows);
+                    localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled); // Save new setting
 
                     alert('データが正常にインポートされました。');
                     renderLinks();
@@ -505,6 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettingsButton.addEventListener('click', () => {
         const newLinksPerRow = parseInt(linksPerRowInput.value);
         const newNumberOfRows = parseInt(numberOfRowsInput.value);
+        const newSortByClicksEnabled = sortByClicksCheckbox.checked; // Get new state
 
         if (isNaN(newLinksPerRow) || newLinksPerRow < 1 || newLinksPerRow > 10) {
             alert('1行あたりのリンク数は1から10の間の数値を入力してください。');
@@ -517,8 +532,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         linksPerRow = newLinksPerRow;
         numberOfRows = newNumberOfRows;
+        sortByClicksEnabled = newSortByClicksEnabled; // Update setting
+
         localStorage.setItem('linksPerRow', linksPerRow);
         localStorage.setItem('numberOfRows', numberOfRows);
+        localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled); // Save new setting
 
         alert('設定が保存されました。');
         renderLinks(); // Re-render links with new settings
