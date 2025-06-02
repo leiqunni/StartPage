@@ -420,4 +420,73 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 15px;
-    transition:
+    transition: background-color 0.2s;
+}
+
+.modal-content button:hover {
+    background-color: #357ae8;
+}
+
+.modal-content .delete-button {
+    background-color: #dc3545;
+}
+
+.modal-content .delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Language selector style */
+#language-selector {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    -webkit-appearance: none; /* Remove default dropdown arrow on WebKit browsers */
+    -moz-appearance: none;    /* Remove default dropdown arrow on Firefox */
+    appearance: none;         /* Remove default dropdown arrow */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%235f6368" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 30px; /* Make space for the custom arrow */
+    color: #5f6368;
+}
+
+#language-selector:hover {
+    background-color: #e8e8e8;
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    .search-input-wrapper,
+    .suggestions-box {
+        width: 95%;
+        max-width: 95%;
+    }
+
+    .links-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        max-width: 100%;
+    }
+
+    .link-button {
+        width: auto;
+        height: 100px; /* Adjust height for smaller buttons */
+    }
+
+    .link-button img.icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .link-button .title {
+        font-size: 12px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}

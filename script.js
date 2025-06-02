@@ -13,17 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkIndex = document.getElementById('modal-link-index');
     const fetchTitleButton = document.getElementById('fetch-title-button');
 
-    // New elements for settings modal
+    // Elements for settings modal
     const settingsButton = document.getElementById('settings-button');
     const settingsModal = document.getElementById('settings-modal');
     const closeSettingsButton = document.getElementById('close-settings-button');
     const linksPerRowInput = document.getElementById('links-per-row');
     const numberOfRowsInput = document.getElementById('number-of-rows');
-    const sortByClicksCheckbox = document.getElementById('sort-by-clicks-checkbox'); // New element
+    const sortByClicksCheckbox = document.getElementById('sort-by-clicks-checkbox');
     const saveSettingsButton = document.getElementById('save-settings-button');
     const exportDataButton = document.getElementById('export-data-button');
     const importDataButton = document.getElementById('import-data-button');
     const importFileInput = document.getElementById('import-file-input');
+
+    // Elements for language selection
+    const languageSelector = document.getElementById('language-selector');
+    let translations = {}; // Object to hold the loaded translations
 
     let links = JSON.parse(localStorage.getItem('chromeLinks')) || [];
     let searchHistory = JSON.parse(localStorage.getItem('chromeSearchHistory')) || [];
@@ -31,20 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load settings or set defaults
     let linksPerRow = parseInt(localStorage.getItem('linksPerRow')) || 8;
     let numberOfRows = parseInt(localStorage.getItem('numberOfRows')) || 3;
-    let sortByClicksEnabled = (localStorage.getItem('sortByClicksEnabled') === 'true'); // New setting
-    let MAX_LINKS = linksPerRow * numberOfRows; // Derived from settings
+    let sortByClicksEnabled = (localStorage.getItem('sortByClicksEnabled') === 'true');
+    let MAX_LINKS = linksPerRow * numberOfRows;
 
-    const MAX_SEARCH_HISTORY = 10; // 検索履歴の最大数
-    let currentSelectedSuggestion = -1; // 現在選択されているサジェストのインデックス
+    const MAX_SEARCH_HISTORY = 10;
+    let currentSelectedSuggestion = -1;
 
-    // 簡易的な固定サジェストデータ（本家APIの代わり）
+    // Fixed suggestions (not translated in JSON as they are dynamic search terms)
     const fixedSuggestions = [
         "今日のニュース", "天気", "株価", "最新のテクノロジー", "おすすめのレストラン",
         "映画情報", "スポーツニュース", "プログラミング", "旅行先", "レシピ",
         "カフェ", "読書", "デザイン", "健康", "フィットネス", "教育"
     ];
 
-    // 既存のリンクデータにclicksプロパティがない場合、初期化する
     links.forEach(link => {
         if (typeof link.clicks === 'undefined') {
             link.clicks = 0;
@@ -53,22 +56,69 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('chromeLinks', JSON.stringify(links));
 
     // ------------------------------------
-    //  リンクの描画
+    //  Internationalization Functions
+    // ------------------------------------
+    async function loadTranslations(lang) {
+        try {
+            const response = await fetch(`lang-${lang}.json`);
+            if (!response.ok) {
+                throw new Error(`Could not load translations for ${lang}`);
+            }
+            translations = await response.json();
+            applyTranslations();
+            localStorage.setItem('selectedLanguage', lang); // Save selected language
+        } catch (error) {
+            console.error(error);
+            // Fallback to default language if loading fails
+            if (lang !== 'en') { // Prevent infinite loop if English also fails
+                loadTranslations('en');
+            }
+        }
+    }
+
+    function applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.dataset.i18n;
+            if (translations[key]) {
+                element.textContent = translations[key];
+            }
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+            const key = element.dataset.i18n-placeholder;
+            if (translations[key]) {
+                element.placeholder = translations[key];
+            }
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach(element => {
+            const key = element.dataset.i18n-title;
+            if (translations[key]) {
+                element.title = translations[key];
+            }
+        });
+        // Update specific elements that need dynamic translation (like modal headers)
+        document.querySelector('#edit-modal h2').textContent = modalLinkIndex.value === '' ? translations.add_new_link_title : translations.edit_link_title;
+    }
+
+    // Set initial language from localStorage or default to Japanese
+    const savedLanguage = localStorage.getItem('selectedLanguage') || 'ja';
+    languageSelector.value = savedLanguage;
+    loadTranslations(savedLanguage);
+
+    // ------------------------------------
+    //  Link Rendering
     // ------------------------------------
     function renderLinks() {
         linksGrid.innerHTML = '';
         linksGrid.style.gridTemplateColumns = `repeat(${linksPerRow}, minmax(120px, 1fr))`;
-        MAX_LINKS = linksPerRow * numberOfRows; // Update MAX_LINKS when rendering
+        MAX_LINKS = linksPerRow * numberOfRows;
 
-        let linksToDisplay = [...links]; // Create a copy to sort
+        let linksToDisplay = [...links];
 
-        // クリック数でソートする設定が有効な場合
         if (sortByClicksEnabled) {
             linksToDisplay.sort((a, b) => b.clicks - a.clicks);
         }
 
         linksToDisplay.slice(0, MAX_LINKS).forEach((link) => {
-            // Find the original index to update clicks correctly
             const originalIndex = links.findIndex(l => l.url === link.url && l.title === link.title);
             const linkButton = createLinkButton(link, originalIndex);
             linksGrid.appendChild(linkButton);
@@ -77,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = links.length; i < MAX_LINKS; i++) {
             const addButton = document.createElement('div');
             addButton.classList.add('link-button', 'add-button');
-            addButton.innerHTML = '+';
+            addButton.textContent = translations.add_button_text || '+'; // Use translated text
             addButton.addEventListener('click', () => {
                 openEditModalForNewLink();
             });
@@ -92,7 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
         linkButton.target = '_blank';
 
         linkButton.addEventListener('click', (e) => {
-            // Ensure index is valid and link exists before updating clicks
             if (index !== -1 && links[index]) {
                 links[index].clicks = (links[index].clicks || 0) + 1;
                 localStorage.setItem('chromeLinks', JSON.stringify(links));
@@ -133,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  編集モーダル関連
+    //  Edit Modal Functions
     // ------------------------------------
     function openEditModal() {
         editModal.style.display = 'flex';
@@ -156,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openEditModalForNewLink() {
         resetEditModalForm();
         deleteLinkButton.style.display = 'none';
-        editModal.querySelector('h2').textContent = '新しいリンクを追加';
+        editModal.querySelector('h2').textContent = translations.add_new_link_title;
         openEditModal();
     }
 
@@ -168,19 +217,19 @@ document.addEventListener('DOMContentLoaded', () => {
             modalLinkIcon.value = link.icon || '';
             modalLinkIndex.value = index;
             deleteLinkButton.style.display = 'inline-block';
-            editModal.querySelector('h2').textContent = 'リンクを編集';
+            editModal.querySelector('h2').textContent = translations.edit_link_title;
             openEditModal();
         }
     }
 
     // ------------------------------------
-    //  設定モーダル関連
+    //  Settings Modal Functions
     // ------------------------------------
     function openSettingsModal() {
         settingsModal.style.display = 'flex';
         linksPerRowInput.value = linksPerRow;
         numberOfRowsInput.value = numberOfRows;
-        sortByClicksCheckbox.checked = sortByClicksEnabled; // Set checkbox state
+        sortByClicksCheckbox.checked = sortByClicksEnabled;
     }
 
     function closeSettingsModal() {
@@ -188,15 +237,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  検索履歴・サジェスト関連
+    //  Search History & Suggestions
     // ------------------------------------
     function saveSearchQuery(query) {
         if (!query) return;
-        // 既存の履歴があれば削除して最新の位置に移動
         searchHistory = searchHistory.filter(item => item !== query);
-        // 新しいクエリを先頭に追加
         searchHistory.unshift(query);
-        // 最大履歴数を超えたら古いものを削除
         if (searchHistory.length > MAX_SEARCH_HISTORY) {
             searchHistory = searchHistory.slice(0, MAX_SEARCH_HISTORY);
         }
@@ -206,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function deleteSearchQuery(queryToDelete) {
         searchHistory = searchHistory.filter(item => item !== queryToDelete);
         localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
-        // 現在の入力に基づいてサジェストを再表示
         showSuggestions(searchInput.value.trim());
     }
 
@@ -222,12 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let combinedSuggestions = [];
 
-        // 検索履歴
         filteredHistory.forEach(item => {
             combinedSuggestions.push({ type: 'history', text: item });
         });
 
-        // 固定サジェスト
         filteredSuggestions.forEach(item => {
             combinedSuggestions.push({ type: 'suggestion', text: item });
         });
@@ -265,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.classList.add('delete-history-btn');
                 deleteBtn.innerHTML = '&times;';
-                deleteBtn.title = '履歴から削除';
+                deleteBtn.title = translations.delete_history_title || 'Delete from history'; // Use translated title
                 deleteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     deleteSearchQuery(item.text);
@@ -284,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  データインポート・エクスポート
+    //  Data Import/Export
     // ------------------------------------
     function exportData() {
         const dataToExport = {
@@ -293,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             settings: {
                 linksPerRow: linksPerRow,
                 numberOfRows: numberOfRows,
-                sortByClicksEnabled: sortByClicksEnabled // Include new setting
+                sortByClicksEnabled: sortByClicksEnabled
             }
         };
         const dataStr = JSON.stringify(dataToExport, null, 2);
@@ -325,7 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     searchHistory = importedData.searchHistory;
                     linksPerRow = importedData.settings.linksPerRow || 8;
                     numberOfRows = importedData.settings.numberOfRows || 3;
-                    // Ensure boolean value for sortByClicksEnabled
                     sortByClicksEnabled = (importedData.settings.sortByClicksEnabled === true);
 
 
@@ -333,46 +375,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
                     localStorage.setItem('linksPerRow', linksPerRow);
                     localStorage.setItem('numberOfRows', numberOfRows);
-                    localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled); // Save new setting
+                    localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
 
-                    alert('データが正常にインポートされました。');
+                    alert(translations.alert_data_imported_success);
                     renderLinks();
                     closeSettingsModal();
                 } else {
-                    alert('インポートされたJSONの形式が正しくありません。');
+                    alert(translations.alert_import_data_invalid_format);
                 }
             } catch (error) {
-                alert('JSONファイルの解析に失敗しました。ファイルが破損しているか、不正な形式です。');
+                alert(translations.alert_import_data_parse_error);
                 console.error('Import error:', error);
             }
         };
         reader.readAsText(file);
-        // Clear the file input after reading
         event.target.value = '';
     }
 
     // ------------------------------------
-    //  タイトル取得機能
+    //  Fetch Title Function
     // ------------------------------------
     async function fetchTitleFromUrl(url) {
         if (!url) {
-            alert('URLを入力してください。');
+            alert(translations.alert_enter_url_for_title_fetch);
             return;
         }
 
         try {
-            // Using a CORS proxy might be necessary for cross-origin requests
-            // For a Chrome Extension, you might not need a proxy if you have host permissions.
-            // For a regular webpage, direct fetch to another domain is usually blocked by CORS.
-            // Here, I'm just demonstrating the fetch call.
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`; // Example CORS proxy
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
             const response = await fetch(proxyUrl);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            const htmlContent = data.contents; // AllOrigins returns content in 'contents'
+            const htmlContent = data.contents;
 
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -381,18 +418,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (title) {
                 modalLinkTitle.value = title;
             } else {
-                alert('タイトルが見つかりませんでした。');
+                alert(translations.alert_title_not_found);
             }
         } catch (error) {
             console.error('Failed to fetch title:', error);
-            alert('タイトル取得に失敗しました。CORSエラーの可能性があります。別のURLを試すか、手動で入力してください。');
+            alert(translations.alert_fetch_title_failed);
         }
     }
 
 
     // ------------------------------------
-    //  イベントリスナー
+    //  Event Listeners
     // ------------------------------------
+    languageSelector.addEventListener('change', (e) => {
+        loadTranslations(e.target.value);
+    });
+
     searchButton.addEventListener('click', () => {
         const query = searchInput.value.trim();
         if (query) {
@@ -439,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 currentSelectedSuggestion--;
                 items[currentSelectedSuggestion].classList.add('selected');
-                searchInput.value = items[currentSelectedSuggestion].querySelector('.text-content').textContent;
+                searchInput.value = searchInput.dataset.originalValue || '';
             } else if (currentSelectedSuggestion === 0) {
                 items[currentSelectedSuggestion].classList.remove('selected');
                 currentSelectedSuggestion = -1;
@@ -472,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = modalLinkIndex.value;
 
         if (!url || !title) {
-            alert('URLとタイトルは必須です。');
+            alert(translations.alert_url_title_required);
             return;
         }
 
@@ -480,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (links.length < MAX_LINKS) {
                 links.push({ url, title, icon, clicks: 0 });
             } else {
-                alert('リンクの最大数に達しました。設定で表示数を増やせます。');
+                alert(translations.alert_max_links_reached);
             }
         } else {
             const existingLink = links[parseInt(index)];
@@ -498,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     deleteLinkButton.addEventListener('click', () => {
-        if (confirm('このリンクを削除してもよろしいですか？')) {
+        if (confirm(translations.confirm_delete_link)) {
             const index = parseInt(modalLinkIndex.value);
             links.splice(index, 1);
             localStorage.setItem('chromeLinks', JSON.stringify(links));
@@ -519,39 +560,38 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettingsButton.addEventListener('click', () => {
         const newLinksPerRow = parseInt(linksPerRowInput.value);
         const newNumberOfRows = parseInt(numberOfRowsInput.value);
-        const newSortByClicksEnabled = sortByClicksCheckbox.checked; // Get new state
+        const newSortByClicksEnabled = sortByClicksCheckbox.checked;
 
         if (isNaN(newLinksPerRow) || newLinksPerRow < 1 || newLinksPerRow > 10) {
-            alert('1行あたりのリンク数は1から10の間の数値を入力してください。');
+            alert(translations.alert_links_per_row_invalid);
             return;
         }
         if (isNaN(newNumberOfRows) || newNumberOfRows < 1 || newNumberOfRows > 5) {
-            alert('行数は1から5の間の数値を入力してください。');
+            alert(translations.alert_number_of_rows_invalid);
             return;
         }
 
         linksPerRow = newLinksPerRow;
         numberOfRows = newNumberOfRows;
-        sortByClicksEnabled = newSortByClicksEnabled; // Update setting
+        sortByClicksEnabled = newSortByClicksEnabled;
 
         localStorage.setItem('linksPerRow', linksPerRow);
         localStorage.setItem('numberOfRows', numberOfRows);
-        localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled); // Save new setting
+        localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
 
-        alert('設定が保存されました。');
-        renderLinks(); // Re-render links with new settings
+        alert(translations.alert_settings_saved);
+        renderLinks();
         closeSettingsModal();
     });
 
     exportDataButton.addEventListener('click', exportData);
 
     importDataButton.addEventListener('click', () => {
-        importFileInput.click(); // Trigger the hidden file input click
+        importFileInput.click();
     });
 
     importFileInput.addEventListener('change', importData);
 
-    // New event listener for fetch title button
     fetchTitleButton.addEventListener('click', () => {
         const url = modalLinkUrl.value.trim();
         fetchTitleFromUrl(url);
