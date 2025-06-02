@@ -31,5 +31,9 @@
     "alert_import_data_parse_error": "解析JSON文件失敗。文件可能已損壞或格式無效。",
     "alert_enter_url_for_title_fetch": "請輸入網址。",
     "alert_title_not_found": "找不到標題。",
-    "alert_fetch_title_failed": "獲取標題失敗。這可能是CORS錯誤。請嘗試其他網址或手動輸入。"
+    "alert_fetch_title_failed": "獲取標題失敗。這可能是CORS錯誤。請嘗試其他網址或手動輸入。",
+    "language_selection_label": "語言:",
+    "alert_data_imported_success": "資料已成功匯入。",
+    "alert_import_data_invalid_format": "匯入資料的格式無效。",
+    "alert_import_data_parse_error": "解析匯入資料時發生錯誤。"
 }

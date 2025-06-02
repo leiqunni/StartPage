@@ -31,5 +31,9 @@
     "alert_import_data_parse_error": "Failed to parse JSON file. The file may be corrupted or in an invalid format.",
     "alert_enter_url_for_title_fetch": "Please enter a URL.",
     "alert_title_not_found": "Title not found.",
-    "alert_fetch_title_failed": "Failed to fetch title. This may be a CORS error. Try another URL or enter manually."
+    "alert_fetch_title_failed": "Failed to fetch title. This may be a CORS error. Try another URL or enter manually.",
+    "language_selection_label": "Language:",
+    "alert_data_imported_success": "Data imported successfully.",
+    "alert_import_data_invalid_format": "Invalid data format for import.",
+    "alert_import_data_parse_error": "Error parsing imported data."    
 }

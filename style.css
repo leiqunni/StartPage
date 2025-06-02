@@ -435,27 +435,52 @@ body {
     background-color: #c82333;
 }
 
-/* Language selector style */
+/* Language selector style inside modal */
 #language-selector {
-    padding: 8px 12px;
-    border-radius: 20px;
+    width: calc(100% - 22px); /* Adjust width to fit modal content */
+    padding: 10px; /* Match other modal inputs */
+    margin-bottom: 15px; /* Add margin for spacing */
     border: 1px solid #ccc;
+    border-radius: 4px; /* Match other modal inputs */
     background-color: #fff;
-    font-size: 14px;
+    font-size: 16px; /* Match other modal inputs */
     cursor: pointer;
-    -webkit-appearance: none; /* Remove default dropdown arrow on WebKit browsers */
-    -moz-appearance: none;    /* Remove default dropdown arrow on Firefox */
-    appearance: none;         /* Remove default dropdown arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     background-image: url('data:image/svg+xml;utf8,<svg fill="%235f6368" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 16px;
-    padding-right: 30px; /* Make space for the custom arrow */
-    color: #5f6368;
+    padding-right: 30px;
+    color: #333; /* Adjust color for modal context */
+    box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 #language-selector:hover {
     background-color: #e8e8e8;
+}
+
+/* Add a new class for settings modal items if needed for consistent spacing */
+.setting-item {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* To align label and input/select */
+    width: 100%;
+}
+
+.setting-item label {
+    font-weight: bold;
+    color: #555;
+    font-size: 14px;
+    flex-shrink: 0; /* Prevent label from shrinking */
+    margin-right: 10px; /* Space between label and input */
+}
+
+.setting-item input[type="checkbox"] {
+    margin-left: 0; /* Remove default margin */
+    transform: scale(1.2); /* Make checkbox slightly larger */
 }
 
 /* Adjustments for smaller screens */
