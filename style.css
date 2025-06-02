@@ -341,37 +341,79 @@ body {
 }
 
 .modal-content input[type="text"],
-.modal-content input[type="number"] { /* Added number input type */
-    width: calc(100% - 22px); /* パディングとボーダーを考慮 */
+.modal-content input[type="number"] {
+    width: calc(100% - 22px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
-    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+    box-sizing: border-box;
 }
+
+/* Specific styling for the title input group to accommodate the fetch button */
+.title-input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.title-input-group input[type="text"] {
+    flex-grow: 1;
+    margin-bottom: 0; /* Remove bottom margin from input within this group */
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#fetch-title-button {
+    background-color: #6c757d; /* A neutral color */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: -1px; /* Overlap border with input */
+    height: 40px; /* Match input height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+#fetch-title-button:hover {
+    background-color: #5a6268;
+}
+
+#fetch-title-button svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
 
 .modal-buttons {
     display: flex;
-    justify-content: flex-end; /* ボタンを右寄せ */
+    justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
 }
 
 .data-management-buttons {
     display: flex;
-    flex-direction: column; /* Stack buttons vertically */
+    flex-direction: column;
     gap: 10px;
     margin-top: 20px;
-    align-items: stretch; /* Stretch buttons to full width */
+    align-items: stretch;
 }
 
 .data-management-buttons button {
-    width: 100%; /* Full width for data management buttons */
+    width: 100%;
 }
 
 .modal-content button {
-    background-color: #4285F4; /* Google Blue */
+    background-color: #4285F4;
     color: white;
     padding: 10px 18px;
     border: none;
@@ -382,13 +424,13 @@ body {
 }
 
 .modal-content button:hover {
-    background-color: #3367D6; /* 少し濃いGoogle Blue */
+    background-color: #3367D6;
 }
 
 .modal-content .delete-button {
-    background-color: #EA4335; /* Google Red */
+    background-color: #EA4335;
 }
 
 .modal-content .delete-button:hover {
-    background-color: #D93025; /* 少し濃いGoogle Red */
+    background-color: #D93025;
 }

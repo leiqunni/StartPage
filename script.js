@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('google-search-input');
     const searchButton = document.getElementById('search-button');
     const suggestionsBox = document.getElementById('suggestions-box');
-    const editModal = document.getElementById('edit-modal'); // Renamed for clarity
+    const editModal = document.getElementById('edit-modal');
     const closeModalButton = editModal.querySelector('.close-button');
     const saveLinkButton = document.getElementById('save-link-button');
     const deleteLinkButton = document.getElementById('delete-link-button');
@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkTitle = document.getElementById('modal-link-title');
     const modalLinkIcon = document.getElementById('modal-link-icon');
     const modalLinkIndex = document.getElementById('modal-link-index');
+    const fetchTitleButton = document.getElementById('fetch-title-button'); // New element
 
     // New elements for settings modal
     const settingsButton = document.getElementById('settings-button');
@@ -337,6 +338,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
+    //  タイトル取得機能
+    // ------------------------------------
+    async function fetchTitleFromUrl(url) {
+        if (!url) {
+            alert('URLを入力してください。');
+            return;
+        }
+
+        try {
+            // Using a CORS proxy might be necessary for cross-origin requests
+            // For a Chrome Extension, you might not need a proxy if you have host permissions.
+            // For a regular webpage, direct fetch to another domain is usually blocked by CORS.
+            // Here, I'm just demonstrating the fetch call.
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`; // Example CORS proxy
+
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const htmlContent = data.contents; // AllOrigins returns content in 'contents'
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+            const title = doc.querySelector('title')?.textContent;
+
+            if (title) {
+                modalLinkTitle.value = title;
+            } else {
+                alert('タイトルが見つかりませんでした。');
+            }
+        } catch (error) {
+            console.error('Failed to fetch title:', error);
+            alert('タイトル取得に失敗しました。CORSエラーの可能性があります。別のURLを試すか、手動で入力してください。');
+        }
+    }
+
+
+    // ------------------------------------
     //  イベントリスナー
     // ------------------------------------
     searchButton.addEventListener('click', () => {
@@ -492,6 +532,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     importFileInput.addEventListener('change', importData);
+
+    // New event listener for fetch title button
+    fetchTitleButton.addEventListener('click', () => {
+        const url = modalLinkUrl.value.trim();
+        fetchTitleFromUrl(url);
+    });
 
     renderLinks(); // Initial render
 });
