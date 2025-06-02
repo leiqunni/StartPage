@@ -118,13 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
             linksToDisplay.sort((a, b) => b.clicks - a.clicks);
         }
 
+        // 表示するリンクのみをスライスして表示
         linksToDisplay.slice(0, MAX_LINKS).forEach((link) => {
             const originalIndex = links.findIndex(l => l.url === link.url && l.title === link.title);
             const linkButton = createLinkButton(link, originalIndex);
             linksGrid.appendChild(linkButton);
         });
 
-        for (let i = links.length; i < MAX_LINKS; i++) {
+        // リンクの数がMAX_LINKSに満たない場合のみ、追加ボタンを1つ表示
+        if (links.length < MAX_LINKS) {
             const addButton = document.createElement('div');
             addButton.classList.add('link-button', 'add-button');
             addButton.textContent = translations.add_button_text || '+'; // Use translated text
