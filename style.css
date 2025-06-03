@@ -1,119 +1,138 @@
+/* CSS Variable Definitions */
+:root {
+    --color-primary: #4285F4; /* Google Blue */
+    --color-secondary: #FBBC05; /* Google Yellow */
+    --color-tertiary: #EA4335; /* Google Red */
+    --color-quaternary: #34A853; /* Google Green */
+    --color-text-dark: #333;
+    --color-text-medium: #5f6368;
+    --color-background-light: #f0f0f0;
+    --color-hover-light: #e8e8e8;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 20px;
+    --spacing-xs: 5px;
+    --spacing-sm: 8px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+}
+
 body {
     margin: 0;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     display: flex;
-    flex-direction: column; /* 全体を縦方向に配置 */
-    justify-content: flex-start; /* 上寄せ */
+    flex-direction: column; /* Arrange elements vertically */
+    justify-content: flex-start; /* Align to the top */
     align-items: center;
     min-height: 100vh;
-    background-color: #f0f0f0; /* 薄いグレーの背景 */
-    color: #333;
-    overflow-y: auto;
+    background-color: var(--color-background-light); /* Light gray background */
+    color: var(--color-text-dark);
+    line-height: 1.6;
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
-/* --- ヘッダーリンク --- */
+/* Header Links */
 .header-links {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
     display: flex;
-    gap: 15px;
-    z-index: 20; /* 最前面に表示 */
+    gap: var(--spacing-md);
+    align-items: center;
+    z-index: 10;
 }
 
 .header-link {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: var(--spacing-xs);
+    color: var(--color-text-medium);
     text-decoration: none;
-    color: #5f6368;
     font-size: 14px;
-    padding: 8px 12px;
-    border-radius: 20px;
-    transition: background-color 0.2s;
+    padding: var(--spacing-sm) 12px;
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.3s ease;
 }
 
 .header-link:hover {
-    background-color: #e8e8e8;
+    background-color: var(--color-hover-light);
 }
 
 .header-link svg {
     width: 20px;
     height: 20px;
-    fill: currentColor;
+    vertical-align: middle;
 }
 
-/* Settings button specific styles */
 .settings-button {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px 12px;
-    border-radius: 20px;
-    transition: background-color 0.2s;
-    color: #5f6368;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
 }
 
-.settings-button:hover {
-    background-color: #e8e8e8;
-}
-
-
+/* Container for search and links */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
     width: 100%;
-    max-width: 960px; /* コンテンツの最大幅を制限 */
+    max-width: 960px; /* Maximum width for the container */
+    padding: var(--spacing-lg);
     box-sizing: border-box;
-    margin-top: 80px; /* ヘッダーリンクとのスペース */
+    margin-top: 10vh; /* Adjust as needed for spacing from top */
 }
 
-/* --- 検索エリア --- */
+/* Google Logo (new in v9) */
+#google-logo {
+    width: 272px;
+    height: auto;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Search Area */
 .search-area {
-    margin-bottom: 50px;
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
+    margin-bottom: var(--spacing-lg);
 }
 
 .search-input-wrapper {
+    position: relative;
     display: flex;
     align-items: center;
-    width: 600px;
-    max-width: 80%;
-    background-color: #fff;
-    border-radius: 24px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    padding: 5px 15px;
-    z-index: 10;
+    width: 90%;
+    max-width: 580px;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+    background-color: white;
 }
 
 #google-search-input {
     flex-grow: 1;
+    padding: 12px 20px;
     border: none;
-    outline: none;
-    padding: 10px 0;
+    border-radius: 24px;
     font-size: 16px;
-    margin-right: 10px;
+    outline: none; /* Remove blue outline on focus */
+    background: transparent;
+}
+
+#google-search-input::placeholder {
+    color: #9aa0a6;
 }
 
 #search-button {
     background: none;
     border: none;
+    padding: 10px 15px;
     cursor: pointer;
-    padding: 5px;
-    color: #4285F4;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--color-text-medium);
 }
 
 #search-button svg {
@@ -121,21 +140,26 @@ body {
     height: 24px;
 }
 
-/* --- 検索候補ボックス --- */
+/* Suggestions Box */
 .suggestions-box {
     position: absolute;
-    top: calc(100% + 5px);
-    width: 600px;
-    max-width: 80%;
-    background-color: #fff;
-    border-radius: 8px;
+    top: 100%; /* Position below the search input */
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 580px; /* Match search input width */
+    background-color: white;
+    border: 1px solid #dfe1e5;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 100;
     list-style: none;
     padding: 0;
-    margin: 0;
-    overflow: hidden;
-    z-index: 9;
-    display: none;
+    margin-top: -1px; /* Overlap border with search input */
+    max-height: 300px;
+    overflow-y: auto;
+    display: none; /* Hidden by default */
 }
 
 .suggestions-box.visible {
@@ -143,177 +167,276 @@ body {
 }
 
 .suggestion-item {
-    padding: 10px 15px;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    font-size: 16px;
-    color: #333;
-    position: relative;
+    padding: 10px 20px;
+    cursor: pointer;
+    color: var(--color-text-dark);
+    gap: 10px;
 }
 
 .suggestion-item:hover,
 .suggestion-item.selected {
-    background-color: #e8e8e8;
-}
-
-.suggestion-item .text-content {
-    flex-grow: 1; /* テキストが削除ボタンの邪魔をしないように */
+    background-color: #f0f0f0;
 }
 
 .suggestion-item .icon-history,
 .suggestion-item .icon-search {
-    margin-right: 10px;
-    color: #666;
-    flex-shrink: 0; /* アイコンが縮まないように */
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-medium);
+}
+
+.suggestion-item .text-content {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .suggestion-item .delete-history-btn {
     background: none;
     border: none;
-    color: #888;
-    cursor: pointer;
+    color: var(--color-text-medium);
     font-size: 18px;
-    padding: 5px;
-    margin-left: 10px;
-    line-height: 1;
-    display: none; /* デフォルトは非表示 */
-    opacity: 0;
-    transition: opacity 0.2s;
+    cursor: pointer;
+    padding: 0 5px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
 }
 
-.suggestion-item:hover .delete-history-btn {
-    display: block; /* ホバー時に表示 */
+.suggestion-item .delete-history-btn:hover {
     opacity: 1;
+    color: var(--color-tertiary);
 }
 
-/* --- リンクグリッド --- */
+/* Links Grid */
 .links-grid {
     display: grid;
-    /* grid-template-columns will be set by JavaScript based on linksPerRow */
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--spacing-md);
     width: 100%;
-    justify-content: center;
-    max-width: calc(120px * 10 + 15px * 9); /* Max for 10 columns for responsiveness */
+    padding: var(--spacing-md) 0;
+    box-sizing: border-box;
 }
 
 .link-button {
-    width: 120px;
-    height: 120px;
-    background-color: #ffffff;
-    border-radius: 12px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md) var(--spacing-sm); /* Changed from v9 */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-    padding: 5px;
-    box-sizing: border-box;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
+    justify-content: center;
     text-decoration: none;
-    color: #333;
-    overflow: hidden;
+    color: var(--color-text-dark);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative; /* For edit icon positioning */
+    height: 120px; /* Fixed height for consistent layout */
+    box-sizing: border-box;
 }
 
 .link-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
 }
 
 .link-button img.icon {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    margin-bottom: 5px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%; /* Make icons circular */
+    object-fit: contain; /* Ensure the image fits within the circle */
+    margin-bottom: var(--spacing-sm);
 }
 
 .link-button .title {
     font-size: 14px;
-    line-height: 1.2;
-    max-height: 3.6em;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    word-break: break-word;
+    width: 100%;
+    padding: 0 5px; /* Add some padding to prevent text from touching edges */
+    box-sizing: border-box;
 }
 
-.add-button {
-    background-color: #e0e0e0;
-    color: #888;
-    font-size: 48px;
+.link-button.add-button {
+    font-size: 40px;
+    color: var(--color-text-medium);
     display: flex;
-    justify-content: center;
     align-items: center;
-    cursor: pointer;
+    justify-content: center;
+    background-color: #f8f8f8;
+    border-style: dashed;
+    border-color: #ccc;
 }
 
-.add-button:hover {
-    background-color: #d0d0d0;
+.link-button.add-button:hover {
+    background-color: #eee;
+    color: var(--color-primary);
 }
 
-.edit-icon {
+/* Edit icon on link buttons */
+.link-button .edit-icon {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(255, 255, 255, 0.8);
     border-radius: 50%;
     padding: 3px;
     cursor: pointer;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
 }
 
 .link-button:hover .edit-icon {
-    opacity: 1;
+    opacity: 1; /* Show on hover */
 }
 
-.edit-icon svg {
-    width: 16px;
-    height: 16px;
-    fill: #fff;
+.link-button .edit-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--color-text-medium);
 }
 
-/* --- モーダル（ポップアップ） --- */
+/* Modal Styling */
 .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.4);
-    justify-content: center;
-    align-items: center;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
 }
 
 .modal-content {
     background-color: #fefefe;
     margin: auto;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    width: 90%;
-    max-width: 400px;
+    padding: var(--spacing-lg); /* Changed from v9 */
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     position: relative;
+    width: 80%; /* Changed from v9 */
+    max-width: 500px; /* Changed from v9 */
     display: flex;
     flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.modal-content h2,
+.modal-content h3 {
+    margin-top: 0;
+    color: var(--color-text-dark);
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-content label {
+    font-weight: bold;
+    margin-top: var(--spacing-sm);
+    color: var(--color-text-medium);
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content select {
+    width: calc(100% - 20px); /* Adjust for padding */
+    padding: 10px;
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius-sm);
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.title-input-group {
+    display: flex;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.title-input-group input {
+    flex-grow: 1;
+    margin-bottom: 0; /* Remove bottom margin from input */
+}
+
+#fetch-title-button {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+#fetch-title-button:hover {
+    background-color: #357ae8; /* Darker blue on hover */
+}
+
+#fetch-title-button svg {
+    fill: white;
+    width: 20px;
+    height: 20px;
+}
+
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+}
+
+#save-link-button,
+#save-settings-button {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+#save-link-button:hover,
+#save-settings-button:hover {
+    background-color: #357ae8;
+}
+
+.delete-button {
+    background-color: var(--color-tertiary);
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #cc0000;
 }
 
 .close-button {
     color: #aaa;
     position: absolute;
     top: 10px;
-    right: 15px;
+    right: 20px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
@@ -321,184 +444,65 @@ body {
 
 .close-button:hover,
 .close-button:focus {
-    color: black;
-    text-decoration: none;
-}
-
-.modal-content h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
     color: #333;
-    text-align: center;
-}
-
-.modal-content label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
-    font-size: 14px;
-}
-
-.modal-content input[type="text"],
-.modal-content input[type="number"] {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-/* Specific styling for the title input group to accommodate the fetch button */
-.title-input-group {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.title-input-group input[type="text"] {
-    flex-grow: 1;
-    margin-bottom: 0; /* Remove bottom margin from input within this group */
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-#fetch-title-button {
-    background-color: #6c757d; /* A neutral color */
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
+    text-decoration: none;
     cursor: pointer;
-    font-size: 14px;
-    margin-left: -1px; /* Overlap border with input */
-    height: 40px; /* Match input height */
+}
+
+/* Settings specific styles */
+.setting-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s;
+    justify-content: space-between;
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid #eee;
 }
 
-#fetch-title-button:hover {
-    background-color: #5a6268;
+.setting-item:last-of-type {
+    border-bottom: none;
 }
 
-#fetch-title-button svg {
-    width: 20px;
-    height: 20px;
-    fill: white;
+.setting-item label {
+    margin-top: 0;
+    flex-grow: 1;
 }
 
-
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+.setting-item input[type="checkbox"] {
+    width: auto;
+    margin: 0;
 }
 
 .data-management-buttons {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-    align-items: stretch;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
 }
 
 .data-management-buttons button {
-    width: 100%;
-}
-
-.modal-content button {
-    background-color: #4285F4;
+    background-color: #6c757d; /* A neutral gray */
     color: white;
-    padding: 10px 18px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
-    font-size: 15px;
-    transition: background-color 0.2s;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
 }
 
-.modal-content button:hover {
-    background-color: #357ae8;
+.data-management-buttons button:hover {
+    background-color: #5a6268;
 }
 
-.modal-content .delete-button {
-    background-color: #dc3545;
-}
-
-.modal-content .delete-button:hover {
-    background-color: #c82333;
-}
-
-/* Language selector style inside modal */
-#language-selector {
-    width: calc(100% - 22px); /* Adjust width to fit modal content */
-    padding: 10px; /* Match other modal inputs */
-    margin-bottom: 15px; /* Add margin for spacing */
-    border: 1px solid #ccc;
-    border-radius: 4px; /* Match other modal inputs */
-    background-color: #fff;
-    font-size: 16px; /* Match other modal inputs */
-    cursor: pointer;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%235f6368" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 16px;
-    padding-right: 30px;
-    color: #333; /* Adjust color for modal context */
-    box-sizing: border-box; /* Ensure padding is included in width */
-}
-
-#language-selector:hover {
-    background-color: #e8e8e8;
-}
-
-/* Add a new class for settings modal items if needed for consistent spacing */
-.setting-item {
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* To align label and input/select */
-    width: 100%;
-}
-
-.setting-item label {
-    font-weight: bold;
-    color: #555;
-    font-size: 14px;
-    flex-shrink: 0; /* Prevent label from shrinking */
-    margin-right: 10px; /* Space between label and input */
-}
-
-.setting-item input[type="checkbox"] {
-    margin-left: 0; /* Remove default margin */
-    transform: scale(1.2); /* Make checkbox slightly larger */
-}
-
-/* Adjustments for smaller screens */
+/* Responsive Adjustments */
 @media (max-width: 768px) {
-    .search-input-wrapper,
-    .suggestions-box {
-        width: 95%;
-        max-width: 95%;
-    }
-
-    .links-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        max-width: 100%;
+    .container {
+        padding: var(--spacing-md);
     }
 
     .link-button {
-        width: auto;
-        height: 100px; /* Adjust height for smaller buttons */
+        padding: var(--spacing-md) var(--spacing-sm); /* Changed from v9 */
     }
 
     .link-button img.icon {
@@ -507,11 +511,39 @@ body {
     }
 
     .link-button .title {
-        font-size: 12px;
+        font-size: 14px;
+    }
+
+    /* .search-input-wrapper,
+    .suggestions-box {
+        width: 90%;
+        max-width: 580px;
+    } */ /* Prioritize global setting from v11 */
+
+    .header-links {
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+
+    .header-link {
+        font-size: 14px;
+        padding: var(--spacing-sm) 12px;
+    }
+
+    .header-link svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    #google-logo { /* Added from v9 */
+        width: 272px;
+        height: auto;
     }
 
     .modal-content {
-        width: 95%;
-        padding: 20px;
+        width: 80%; /* Changed from v9 */
+        max-width: 500px; /* Changed from v9 */
+        padding: var(--spacing-lg); /* Changed from v9 */
     }
 }

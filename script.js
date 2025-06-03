@@ -43,9 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fixed suggestions (not translated in JSON as they are dynamic search terms)
     const fixedSuggestions = [
-        "今日のニュース", "天気", "株価", "最新のテクノロジー", "おすすめのレストラン",
-        "映画情報", "スポーツニュース", "プログラミング", "旅行先", "レシピ",
-        "カフェ", "読書", "デザイン", "健康", "フィットネス", "教育"
+        "Today's news", "Weather", "Stock prices", "Latest technology", "Recommended restaurants",
+        "Movie information", "Sports news", "Programming", "Travel destinations", "Recipes",
+        "Cafe", "Reading", "Design", "Health", "Fitness", "Education"
     ];
 
     links.forEach(link => {
@@ -84,13 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
-            const key = element.dataset.i18n-placeholder;
+            const key = element.dataset.i18nPlaceholder; // Corrected from data-i18n-placeholder
             if (translations[key]) {
                 element.placeholder = translations[key];
             }
         });
         document.querySelectorAll('[data-i18n-title]').forEach(element => {
-            const key = element.dataset.i18n-title;
+            const key = element.dataset.i18nTitle; // Corrected from data-i18n-title
             if (translations[key]) {
                 element.title = translations[key];
             }
@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#edit-modal h2').textContent = modalLinkIndex.value === '' ? translations.add_new_link_title : translations.edit_link_title;
     }
 
-    // Set initial language from localStorage or default to Japanese
-    const savedLanguage = localStorage.getItem('selectedLanguage') || 'ja';
+    // Set initial language from localStorage or default to English
+    const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
     languageSelector.value = savedLanguage;
     loadTranslations(savedLanguage);
 
@@ -118,14 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
             linksToDisplay.sort((a, b) => b.clicks - a.clicks);
         }
 
-        // 表示するリンクのみをスライスして表示
+        // Slice and display only the links that fit the grid
         linksToDisplay.slice(0, MAX_LINKS).forEach((link) => {
             const originalIndex = links.findIndex(l => l.url === link.url && l.title === link.title);
             const linkButton = createLinkButton(link, originalIndex);
             linksGrid.appendChild(linkButton);
         });
 
-        // リンクの数がMAX_LINKSに満たない場合のみ、追加ボタンを1つ表示
+        // Display an add button only if the number of links is less than MAX_LINKS
         if (links.length < MAX_LINKS) {
             const addButton = document.createElement('div');
             addButton.classList.add('link-button', 'add-button');
@@ -564,11 +564,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const newNumberOfRows = parseInt(numberOfRowsInput.value);
         const newSortByClicksEnabled = sortByClicksCheckbox.checked;
 
-        if (isNaN(newLinksPerRow) || newLinksPerRow < 1 || newLinksPerRow > 10) {
+        if (isNaN(newLinksPerRow) || newLinksPerRow < 1 || newLinksPerRow > 20) {
             alert(translations.alert_links_per_row_invalid);
             return;
         }
-        if (isNaN(newNumberOfRows) || newNumberOfRows < 1 || newNumberOfRows > 5) {
+        if (isNaN(newNumberOfRows) || newNumberOfRows < 1 || newNumberOfRows > 20) {
             alert(translations.alert_number_of_rows_invalid);
             return;
         }
