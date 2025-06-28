@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<link rel="stylesheet" href="css/styles.css?v=1.0">
+	<!--[if lt IE 9]>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+	<![endif]-->
+	<style>
+	<!--
+.wrap {
+    display: flex;
+    flex-wrap: wrap;/* 折り返し */
+    justify-content: space-between;/* 幅いっぱい */
+    row-gap: 10px;/* 行の隙間 */
+}
+
+	//-->
+	</style>
+
+	<script src="" async></script>
+</head>
+<body>
+<div class="container">
+<div class="wrapper">
+  <div class="item">item1</div>
+  <div class="item">item2</div>
+  <div class="item">item3</div>
+  <div class="item">item4</div>
+  <div class="item">item5</div>
+  <div class="item">item6</div>
+  <div class="item">item7</div>
+  <div class="item">item8</div>
+  <div class="item">item9</div>
+  <div class="item">item10</div>
+</div>
+</div>
+
+<style>
+:root {
+    --color-primary: #4285F4; /* Google Blue */
+    --color-secondary: #FBBC05; /* Google Yellow */
+    --color-tertiary: #EA4335; /* Google Red */
+    --color-quaternary: #34A853; /* Google Green */
+    --color-text-dark: #333;
+    --color-text-medium: #5f6368;
+    --color-background-light: #f0f0f0;
+    --color-hover-light: #e8e8e8;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 20px;
+    --spacing-xs: 5px;
+    --spacing-sm: 8px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+}
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column; /* Arrange elements vertically */
+    justify-content: flex-start; /* Align to the top */
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--color-background-light); /* Light gray background */
+    color: var(--color-text-dark);
+    line-height: 1.6;
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    padding: var(--spacing-lg);
+    box-sizing: border-box;
+    margin-top: 10vh; /* Adjust as needed for spacing from top */
+}
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 120px);
+    grid-gap: 5px;
+    width: 100%;
+    padding: var(--spacing-md) 0;
+    box-sizing: border-box;
+}
+
+.item {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md) var(--spacing-sm); /* Changed from v9 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--color-text-dark);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative; /* For edit icon positioning */
+    height: 120px; /* Fixed height for consistent layout */
+    box-sizing: border-box;
+}
+</style>
+</body>
+</html>

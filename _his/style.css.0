@@ -71,7 +71,7 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 1280px;
+    max-width: 960px;
     padding: var(--spacing-lg);
     box-sizing: border-box;
     margin-top: 10vh;
@@ -130,8 +130,7 @@ body {
 .links-grid {
     display: grid;
     /* レスポンシブな動きに変更 */
-    /* grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); */
-	grid-template-columns: repeat(auto-fill, 120px);
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     grid-gap: 5px;
     width: 100%;
     padding: var(--spacing-sm) 0;

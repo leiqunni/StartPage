@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // suggestionsBoxはHTMLに存在しない場合があるため、nullチェックを追加
     const suggestionsBox = document.getElementById('suggestions-box');
     const editModal = document.getElementById('edit-modal');
-    const closeModalButton = editModal.querySelector('.close-button');
+//    const closeModalButton = editModal.querySelector('.close-button');
     const saveLinkButton = document.getElementById('save-link-button');
     const deleteLinkButton = document.getElementById('delete-link-button');
     const modalLinkUrl = document.getElementById('modal-link-url');
@@ -32,30 +32,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLanguage = localStorage.getItem('language') || 'en';
     let translations = {};
 
-    // ------------------------------------
-    //  Internationalization Functions
-    // ------------------------------------
-    async function loadTranslations(lang) {
-        try {
-            // ここを修正: _locales/lang-${lang}.json から lang-${lang}.json に変更
-            const response = await fetch(`lang-${lang}.json`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            translations = Object.keys(data).reduce((acc, key) => {
-                acc[key] = data[key].message;
-                return acc;
-            }, {});
-            applyTranslations();
-        } catch (error) {
-            console.error('Error loading translations:', error);
-            // Fallback to English if loading fails
-            if (lang !== 'en') {
-                loadTranslations('en');
-            }
-        }
-    }
+    // Load translations
+//     async function loadTranslations(lang) {
+//         try {
+//             // ここを修正: _locales/lang-${lang}.json から lang-${lang}.json に変更
+//             const response = await fetch(`lang-${lang}.json`);
+//             if (!response.ok) {
+//                 throw new Error(`HTTP error! status: ${response.status}`);
+//             }
+//             const data = await response.json();
+//             translations = Object.keys(data).reduce((acc, key) => {
+//                 acc[key] = data[key].message;
+//                 return acc;
+//             }, {});
+//             applyTranslations();
+//         } catch (error) {
+//             console.error('Error loading translations:', error);
+//             // Fallback to English if loading fails
+//             if (lang !== 'en') {
+//                 loadTranslations('en');
+//             }
+//         }
+//     }
 
     // Apply translations to elements
     function applyTranslations() {
@@ -80,13 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initialize translations on load
-    loadTranslations(currentLanguage);
+//     loadTranslations(currentLanguage);
 
-    // ------------------------------------
-    //  Link Rendering
-    // ------------------------------------
     function renderLinks() {
-        linksGrid.innerHTML = ''; // Clear existing links
+//         linksGrid.innerHTML = ''; // Clear existing links
 
         // Sort links if enabled
         let displayedLinks = [...links];
@@ -127,14 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            linksGrid.appendChild(linkButton);
+             linksGrid.appendChild(linkButton);
         });
 
-        const addLinkButton = document.createElement('button');
-        addLinkButton.className = 'link-button add-button';
-        addLinkButton.innerHTML = '+';
-        addLinkButton.addEventListener('click', () => openEditModal(null, -1)); // -1 for new link
-        linksGrid.appendChild(addLinkButton);
+//         const addLinkButton = document.createElement('button');
+//         addLinkButton.className = 'link-button add-button';
+//         addLinkButton.innerHTML = '+';
+//         addLinkButton.addEventListener('click', () => openEditModal(null, -1)); // -1 for new link
+//         linksGrid.appendChild(addLinkButton);
     }
 
     function getFaviconUrl(url) {
@@ -165,9 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modalLinkUrl.focus();
     }
 
-    closeModalButton.addEventListener('click', () => {
-        editModal.style.display = 'none';
-    });
+//     closeModalButton.addEventListener('click', () => {
+//         editModal.style.display = 'none';
+//     });
 
     window.addEventListener('click', (event) => {
         if (event.target === editModal) {
@@ -178,70 +173,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    saveLinkButton.addEventListener('click', () => {
-        const url = modalLinkUrl.value.trim();
-        const title = modalLinkTitle.value.trim();
-        const icon = modalLinkIcon.value.trim();
-        const index = parseInt(modalLinkIndex.value);
+//     saveLinkButton.addEventListener('click', () => {
+//         const url = modalLinkUrl.value.trim();
+//         const title = modalLinkTitle.value.trim();
+//         const icon = modalLinkIcon.value.trim();
+//         const index = parseInt(modalLinkIndex.value);
+// 
+//         if (!url || !title) {
+//             alert(translations.alert_url_title_required);
+//             return;
+//         }
+// 
+//         const newLink = { url, title, icon, clicks: 0 };
+// 
+//         if (index === -1) {
+//             links.push(newLink); // Add new link
+//         } else {
+//             // Update existing link, preserve clicks
+//             newLink.clicks = links[index].clicks;
+//             links[index] = newLink;
+//         }
+// 
+//         localStorage.setItem('links', JSON.stringify(links));
+//         renderLinks();
+//         editModal.style.display = 'none';
+//     });
 
-        if (!url || !title) {
-            alert(translations.alert_url_title_required);
-            return;
-        }
-
-        const newLink = { url, title, icon, clicks: 0 };
-
-        if (index === -1) {
-            links.push(newLink); // Add new link
-        } else {
-            // Update existing link, preserve clicks
-            newLink.clicks = links[index].clicks;
-            links[index] = newLink;
-        }
-
-        localStorage.setItem('links', JSON.stringify(links));
-        renderLinks();
-        editModal.style.display = 'none';
-    });
-
-    deleteLinkButton.addEventListener('click', () => {
-        const index = parseInt(modalLinkIndex.value);
-        if (index !== -1 && confirm(translations.confirm_delete_link)) {
-            links.splice(index, 1);
-            localStorage.setItem('links', JSON.stringify(links));
-            renderLinks();
-            editModal.style.display = 'none';
-        }
-    });
+//     deleteLinkButton.addEventListener('click', () => {
+//         const index = parseInt(modalLinkIndex.value);
+//         if (index !== -1 && confirm(translations.confirm_delete_link)) {
+//             links.splice(index, 1);
+//             localStorage.setItem('links', JSON.stringify(links));
+//             renderLinks();
+//             editModal.style.display = 'none';
+//         }
+//     });
 
     // Search functionality
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.trim();
-        if (query.length > 0) {
-            showSuggestions(query);
-        } else {
-            hideSuggestions();
-        }
-    });
+//     searchInput.addEventListener('input', () => {
+//         const query = searchInput.value.trim();
+//         if (query.length > 0) {
+//             showSuggestions(query);
+//         } else {
+//             hideSuggestions();
+//         }
+//     });
 
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const selectedSuggestion = suggestionsBox?.querySelector('.suggestion-item.selected');
-            if (selectedSuggestion) {
-                searchInput.value = selectedSuggestion.dataset.value;
-            }
-            performSearch();
-            hideSuggestions();
-        } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            navigateSuggestions(1);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            navigateSuggestions(-1);
-        }
-    });
+//     searchInput.addEventListener('keydown', (e) => {
+//         if (e.key === 'Enter') {
+//             const selectedSuggestion = suggestionsBox?.querySelector('.suggestion-item.selected');
+//             if (selectedSuggestion) {
+//                 searchInput.value = selectedSuggestion.dataset.value;
+//             }
+//             performSearch();
+//             hideSuggestions();
+//         } else if (e.key === 'ArrowDown') {
+//             e.preventDefault();
+//             navigateSuggestions(1);
+//         } else if (e.key === 'ArrowUp') {
+//             e.preventDefault();
+//             navigateSuggestions(-1);
+//         }
+//     });
 
-    searchButton.addEventListener('click', performSearch);
+//     searchButton.addEventListener('click', performSearch);
 
     function performSearch() {
         const query = searchInput.value.trim();
@@ -368,171 +363,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Settings Modal
-    settingsButton.addEventListener('click', () => {
-        sortByClicksCheckbox.checked = sortByClicksEnabled;
-        languageSelector.value = currentLanguage;
-        settingsModal.style.display = 'flex';
-    });
+//     settingsButton.addEventListener('click', () => {
+//         sortByClicksCheckbox.checked = sortByClicksEnabled;
+//         languageSelector.value = currentLanguage;
+//         settingsModal.style.display = 'flex';
+//     });
 
-    closeSettingsButton.addEventListener('click', () => {
-        settingsModal.style.display = 'none';
-    });
+//     closeSettingsButton.addEventListener('click', () => {
+//         settingsModal.style.display = 'none';
+//     });
 
-    languageSelector.addEventListener('change', (event) => {
-        currentLanguage = event.target.value;
-        localStorage.setItem('language', currentLanguage);
-        loadTranslations(currentLanguage); // Reload and apply translations immediately
-    });
+//     languageSelector.addEventListener('change', (event) => {
+//         currentLanguage = event.target.value;
+//         localStorage.setItem('language', currentLanguage);
+//         loadTranslations(currentLanguage); // Reload and apply translations immediately
+//     });
 
 
-    saveSettingsButton.addEventListener('click', () => {
-        const newSortByClicksEnabled = sortByClicksCheckbox.checked;
-
-        sortByClicksEnabled = newSortByClicksEnabled;
-
-        localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
-
-        // ここでtranslations.alert_settings_savedがundefinedにならないか確認
-        alert(translations.alert_settings_saved);
-        renderLinks();
-        closeSettingsModal();
-    });
+//     saveSettingsButton.addEventListener('click', () => {
+//         const newSortByClicksEnabled = sortByClicksCheckbox.checked;
+// 
+//         sortByClicksEnabled = newSortByClicksEnabled;
+// 
+//         localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
+// 
+//         // ここでtranslations.alert_settings_savedがundefinedにならないか確認
+//         alert(translations.alert_settings_saved);
+//         renderLinks();
+//         closeSettingsModal();
+//     });
 
     function closeSettingsModal() {
         settingsModal.style.display = 'none';
     }
 
+//     exportDataButton.addEventListener('click', exportData);
 
+//     importDataButton.addEventListener('click', () => {
+//         importFileInput.click();
+//     });
 
+//     importFileInput.addEventListener('change', importData);
 
+//     fetchTitleButton.addEventListener('click', () => {
+//         const url = modalLinkUrl.value.trim();
+//         fetchTitleFromUrl(url);
+//     });
 
-    // ------------------------------------
-    //  Search History & Suggestions
-    // ------------------------------------
-    function saveSearchQuery(query) {
-        if (!query) return;
-        searchHistory = searchHistory.filter(item => item !== query);
-        searchHistory.unshift(query);
-        if (searchHistory.length > MAX_SEARCH_HISTORY) {
-            searchHistory = searchHistory.slice(0, MAX_SEARCH_HISTORY);
-        }
-        localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
-    }
-
-    function deleteSearchQuery(queryToDelete) {
-        searchHistory = searchHistory.filter(item => item !== queryToDelete);
-        localStorage.setItem('chromeSearchHistory', JSON.stringify(searchHistory));
-        showSuggestions(searchInput.value.trim());
-    }
-
-    async function showSuggestions(query) {
-        suggestionsBox.innerHTML = '';
-        suggestionsBox.classList.remove('visible');
-        currentSelectedSuggestion = -1;
-
-        if (query.length === 0) return;
-
-        const filteredHistory = searchHistory.filter(h => h.toLowerCase().includes(query.toLowerCase()));
-        const filteredSuggestions = fixedSuggestions.filter(s => s.toLowerCase().includes(query.toLowerCase()) && !filteredHistory.includes(s));
-
-        let combinedSuggestions = [];
-
-        filteredHistory.forEach(item => {
-            combinedSuggestions.push({ type: 'history', text: item });
-        });
-
-        filteredSuggestions.forEach(item => {
-            combinedSuggestions.push({ type: 'suggestion', text: item });
-        });
-
-        if (combinedSuggestions.length === 0) {
-            return;
-        }
-
-        combinedSuggestions.forEach((item, index) => {
-            const suggestionItem = document.createElement('div');
-            suggestionItem.classList.add('suggestion-item');
-            suggestionItem.dataset.index = index;
-
-            const iconSvg = item.type === 'history' ?
-                '<svg class="icon-history" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C8.28 19.99 10.04 20.72 12 20.72c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>' :
-                '<svg class="icon-search" viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
-
-            const textSpan = document.createElement('span');
-            textSpan.classList.add('text-content');
-            textSpan.textContent = item.text;
-
-            suggestionItem.appendChild(DOMParser.parseFromString(iconSvg, 'image/svg+xml').documentElement);
-            suggestionItem.appendChild(textSpan);
-
-            suggestionItem.addEventListener('click', (e) => {
-                if (e.target.classList.contains('delete-history-btn') || e.target.closest('.delete-history-btn')) {
-                    return;
-                }
-                searchInput.value = item.text;
-                hideSuggestions();
-                searchButton.click();
-            });
-
-            if (item.type === 'history') {
-                const deleteBtn = document.createElement('button');
-                deleteBtn.classList.add('delete-history-btn');
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.title = translations.delete_history_title || 'Delete from history'; // Use translated title
-                deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    deleteSearchQuery(item.text);
-                });
-                suggestionItem.appendChild(deleteBtn);
-            }
-            suggestionsBox.appendChild(suggestionItem);
-        });
-
-        suggestionsBox.classList.add('visible');
-    }
-
-    function hideSuggestions() {
-        suggestionsBox.classList.remove('visible');
-        currentSelectedSuggestion = -1;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    exportDataButton.addEventListener('click', exportData);
-
-    importDataButton.addEventListener('click', () => {
-        importFileInput.click();
-    });
-
-    importFileInput.addEventListener('change', importData);
-
-    fetchTitleButton.addEventListener('click', () => {
-        const url = modalLinkUrl.value.trim();
-        fetchTitleFromUrl(url);
-    });
-
-    // ------------------------------------
-    //  Fetch Title Function
-    // ------------------------------------
     async function fetchTitleFromUrl(url) {
         if (!url) {
             alert(translations.alert_url_required_for_title_fetch);
@@ -543,7 +420,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalButtonContent = fetchTitleButton.innerHTML;
         const originalButtonTitle = fetchTitleButton.title;
         fetchTitleButton.disabled = true;
-        fetchTitleButton.innerHTML = `${translations.fetching_title || '取得中...'}`;
+        fetchTitleButton.innerHTML = `${translations.fetching_title || '取得中...'}
+        `;
         fetchTitleButton.title = translations.fetching_title_tooltip || 'タイトル取得中';
 
 
@@ -576,9 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ------------------------------------
-    //  Data Import/Export
-    // ------------------------------------
     function exportData() {
         const data = {
             links: links,
