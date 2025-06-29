@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkUrl = document.getElementById('modal-link-url');
     const modalLinkTitle = document.getElementById('modal-link-title');
     const modalLinkIcon = document.getElementById('modal-link-icon');
-    const modalLinkIndex = document = document.getElementById('modal-link-index');
+    const modalLinkIndex = document.getElementById('modal-link-index');
     const fetchTitleButton = document.getElementById('fetch-title-button');
 
     // Elements for settings modal
@@ -32,6 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentLanguage = localStorage.getItem('language') || 'en';
     let translations = {};
 
+    const MAX_SEARCH_HISTORY = 10;
+    let currentSelectedSuggestion = -1;
+
+    // Fixed suggestions (not translated in JSON as they are dynamic search terms)
+    const fixedSuggestions = [
+        "Today's news", "Weather", "Stock prices", "Latest technology", "Recommended restaurants",
+        "Movie information", "Sports news", "Programming", "Travel destinations", "Recipes",
+        "Cafe", "Reading", "Design", "Health", "Fitness", "Education"
+    ];
+
     // ------------------------------------
     //  Internationalization Functions
     // ------------------------------------
@@ -48,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return acc;
             }, {});
             applyTranslations();
+			document.documentElement.lang = currentLanguage;
         } catch (error) {
             console.error('Error loading translations:', error);
             // Fallback to English if loading fails
@@ -254,77 +265,78 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showSuggestions(query) {
-        // suggestionsBoxがDOMに存在しない場合、処理をスキップ
-        if (!suggestionsBox) return;
-
-        suggestionsBox.innerHTML = '';
-        const lowerCaseQuery = query.toLowerCase();
-
-        // Filter search history
-        const filteredHistory = searchHistory.filter(item =>
-            item.toLowerCase().includes(lowerCaseQuery)
-        );
-
-        // Add history suggestions
-        filteredHistory.forEach(item => {
-            const suggestionItem = document.createElement('div');
-            suggestionItem.className = 'suggestion-item';
-            suggestionItem.dataset.value = item;
-            suggestionItem.innerHTML = `
-                <svg class="icon-history" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C8.26 19.92 10.03 20.5 12 20.5c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
-                <span class="text-content">${item}</span>
-                <button class="delete-history-btn" data-value="${item}">&times;</button>
-            `;
-            suggestionsBox.appendChild(suggestionItem);
-
-            suggestionItem.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('delete-history-btn')) {
-                    searchInput.value = item;
-                    performSearch();
-                    hideSuggestions();
-                }
-            });
-
-            suggestionItem.querySelector('.delete-history-btn').addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent the parent suggestionItem's click
-                const valueToDelete = e.target.dataset.value;
-                deleteSearchHistoryItem(valueToDelete);
-                showSuggestions(searchInput.value.trim()); // Re-render suggestions
-            });
-        });
-
-        // Always add current query as a search suggestion (if not already in history suggestions)
-        if (query && !filteredHistory.some(item => item.toLowerCase() === lowerCaseQuery)) {
-            const suggestionItem = document.createElement('div');
-            suggestionItem.className = 'suggestion-item';
-            suggestionItem.dataset.value = query;
-            suggestionItem.innerHTML = `
-                <svg class="icon-search" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                <span class="text-content">${query}</span>
-            `;
-            suggestionsBox.appendChild(suggestionItem);
-
-            suggestionItem.addEventListener('click', () => {
-                searchInput.value = query;
-                performSearch();
-                hideSuggestions();
-            });
-        }
-
-
-        if (suggestionsBox.children.length > 0) {
-            suggestionsBox.classList.add('visible');
-        } else {
-            suggestionsBox.classList.remove('visible');
-        }
-    }
+//     function showSuggestions(query) {
+//         // suggestionsBoxがDOMに存在しない場合、処理をスキップ
+//         if (!suggestionsBox) return;
+// 
+//         suggestionsBox.innerHTML = '';
+//         const lowerCaseQuery = query.toLowerCase();
+// 
+//         // Filter search history
+//         const filteredHistory = searchHistory.filter(item =>
+//             item.toLowerCase().includes(lowerCaseQuery)
+//         );
+// 
+//         // Add history suggestions
+//         filteredHistory.forEach(item => {
+//             const suggestionItem = document.createElement('div');
+//             suggestionItem.className = 'suggestion-item';
+//             suggestionItem.dataset.value = item;
+//             suggestionItem.innerHTML = `
+//                 <svg class="icon-history" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C8.26 19.92 10.03 20.5 12 20.5c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+//                 <span class="text-content">${item}</span>
+//                 <button class="delete-history-btn" data-value="${item}">&times;</button>
+//             `;
+//             suggestionsBox.appendChild(suggestionItem);
+// 
+//             suggestionItem.addEventListener('click', (e) => {
+//                 if (!e.target.classList.contains('delete-history-btn')) {
+//                     searchInput.value = item;
+//                     performSearch();
+//                     hideSuggestions();
+//                 }
+//             });
+// 
+//             suggestionItem.querySelector('.delete-history-btn').addEventListener('click', (e) => {
+//                 e.stopPropagation(); // Prevent the parent suggestionItem's click
+//                 const valueToDelete = e.target.dataset.value;
+//                 deleteSearchHistoryItem(valueToDelete);
+//                 showSuggestions(searchInput.value.trim()); // Re-render suggestions
+//             });
+//         });
+// 
+//         // Always add current query as a search suggestion (if not already in history suggestions)
+//         if (query && !filteredHistory.some(item => item.toLowerCase() === lowerCaseQuery)) {
+//             const suggestionItem = document.createElement('div');
+//             suggestionItem.className = 'suggestion-item';
+//             suggestionItem.dataset.value = query;
+//             suggestionItem.innerHTML = `
+//                 <svg class="icon-search" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+//                 <span class="text-content">${query}</span>
+//             `;
+//             suggestionsBox.appendChild(suggestionItem);
+// 
+//             suggestionItem.addEventListener('click', () => {
+//                 searchInput.value = query;
+//                 performSearch();
+//                 hideSuggestions();
+//             });
+//         }
+// 
+// 
+//         if (suggestionsBox.children.length > 0) {
+//             suggestionsBox.classList.add('visible');
+//         } else {
+//             suggestionsBox.classList.remove('visible');
+//         }
+//     }
 
     function hideSuggestions() {
         // suggestionsBoxがDOMに存在しない場合、処理をスキップ
         if (!suggestionsBox) return;
         suggestionsBox.classList.remove('visible');
         suggestionsBox.innerHTML = '';
+        currentSelectedSuggestion = -1;
     }
 
     function navigateSuggestions(direction) {
@@ -491,10 +503,10 @@ document.addEventListener('DOMContentLoaded', () => {
         suggestionsBox.classList.add('visible');
     }
 
-    function hideSuggestions() {
-        suggestionsBox.classList.remove('visible');
-        currentSelectedSuggestion = -1;
-    }
+//     function hideSuggestions() {
+//         suggestionsBox.classList.remove('visible');
+//         currentSelectedSuggestion = -1;
+//     }
 
 
 
