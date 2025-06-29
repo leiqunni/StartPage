@@ -45,18 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------
     //  Internationalization Functions
     // ------------------------------------
-    async function loadTranslations(lang) {
+	async function loadTranslations(lang) {
         try {
-            // ここを修正: _locales/lang-${lang}.json から lang-${lang}.json に変更
             const response = await fetch(`lang-${lang}.json`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            translations = Object.keys(data).reduce((acc, key) => {
-                acc[key] = data[key].message;
-                return acc;
-            }, {});
+            translations = data; // Store the raw translation object
             applyTranslations();
 			document.documentElement.lang = currentLanguage;
         } catch (error) {
