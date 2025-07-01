@@ -407,3 +407,74 @@ body {
 .data-management-buttons button:hover {
     background-color: #5a6268;
 }
+
+/* Suggestions Box */
+
+.suggestions-box {
+    position: absolute;
+	top: 152px;
+    width: 90%;
+    max-width: 746px;
+    background-color: white;
+    border: 1px solid #dfe1e5;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 100;
+    list-style: none;
+    padding: 0;
+    margin-top: -1px; /* Overlap border with search input */
+    max-height: 300px;
+    overflow-y: auto;
+    display: none; /* Hidden by default */
+}
+
+.suggestions-box.visible {
+    display: block;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 20px;
+    cursor: pointer;
+    color: var(--color-text-dark);
+    gap: 8px;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background-color: #f0f0f0;
+}
+
+.suggestion-item .icon-history,
+.suggestion-item .icon-search {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-medium);
+}
+
+.suggestion-item .text-content {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.suggestion-item .delete-history-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-medium);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0 5px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.suggestion-item .delete-history-btn:hover {
+    opacity: 1;
+    color: var(--color-tertiary);
+}
+
