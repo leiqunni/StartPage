@@ -29,8 +29,19 @@
     "alert_data_imported_success": "Data imported successfully.",
     "alert_import_data_invalid_format": "The imported JSON format is incorrect.",
     "alert_import_data_parse_error": "Failed to parse JSON file. The file may be corrupted or in an invalid format.",
-    "alert_enter_url_for_title_fetch": "Please enter a URL.",
-    "alert_title_not_found": "Title not found.",
-    "alert_fetch_title_failed": "Failed to fetch title. This may be a CORS error. Try another URL or enter manually.",
-    "language_selection_label": "Language:"
+    "alert_url_required_for_title_fetch": "Please enter a URL.",
+    "alert_no_title_found": "Title not found.",
+    "alert_failed_to_fetch_title": "Failed to fetch title. This may be a CORS error. Try another URL or enter manually.",
+    "language_selection_label": "Language:",
+    "fetching_title": "Fetching...",
+    "fetching_title_tooltip": "Fetching title",
+    "alert_error_fetching_title": "Error fetching title",
+    "alert_import_links_corrupted": "Link data is corrupted.",
+    "alert_import_failed": "Import failed",
+    "alert_data_exported": "Data exported successfully.",
+    "alert_invalid_url_format": "Invalid URL format. Please enter a valid URL.",
+    "custom_alert_title": "Alert",
+    "custom_confirm_title": "Confirmation",
+    "ok_button": "OK",
+    "cancel_button": "Cancel"
 }

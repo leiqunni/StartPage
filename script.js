@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM要素の取得
+    // Get DOM elements
     const linksGrid = document.getElementById('links-grid');
     const searchInput = document.getElementById('google-search-input');
     const searchButton = document.getElementById('search-button');
@@ -14,7 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalLinkIndex = document.getElementById('modal-link-index');
     const fetchTitleButton = document.getElementById('fetch-title-button');
 
-    // 設定モーダル要素
+    // New DOM elements for search engine selection
+    const searchEngineSelector = document.getElementById('search-engine-selector');
+
+    // Settings modal elements
     const settingsButton = document.getElementById('settings-button');
     const settingsModal = document.getElementById('settings-modal');
     const closeSettingsButton = document.getElementById('close-settings-button');
@@ -25,17 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const importDataButton = document.getElementById('import-data-button');
     const importFileInput = document.getElementById('import-file-input');
 
-    // データの初期化
+    // Custom alert/confirm modal elements
+    const customAlertModal = document.getElementById('custom-alert-modal');
+    const alertTitle = document.getElementById('alert-title');
+    const alertMessage = document.getElementById('alert-message');
+    const alertOkButton = document.getElementById('alert-ok-button');
+    const closeAlertButton = document.getElementById('close-alert-button');
+
+    const customConfirmModal = document.getElementById('custom-confirm-modal');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmMessage = document.getElementById('confirm-message');
+    const confirmOkButton = document.getElementById('confirm-ok-button');
+    const confirmCancelButton = document.getElementById('confirm-cancel-button');
+    const closeConfirmButton = document.getElementById('close-confirm-button');
+
+
+    // Data initialization
     let links = JSON.parse(localStorage.getItem('links')) || [];
     let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
     let sortByClicksEnabled = localStorage.getItem('sortByClicksEnabled') === 'true';
     let currentLanguage = localStorage.getItem('language') || 'en';
+    let currentSearchEngine = localStorage.getItem('searchEngine') || 'google';
     let translations = {};
 
+    // Constants
     const MAX_SEARCH_HISTORY = 10;
-    let currentSelectedSuggestion = -1;
+    const NEW_LINK_INDEX = -1; // Used to indicate adding a new link
+    const URL_REGEX = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|[a-zA-Z0-9]+\.[^\s]{2,})$/i;
 
-    // 固定サジェスト（検索候補）
+    let currentSelectedSuggestion = -1;
+    let confirmResolve; // To handle promise resolution for custom confirm dialog
+
+    // Fixed suggestions (search candidates)
     const fixedSuggestions = [
         "Today's news", "Weather", "Stock prices", "Latest technology", "Recommended restaurants",
         "Movie information", "Sports news", "Programming", "Travel destinations", "Recipes",
@@ -43,8 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // ------------------------------------
-    //  国際化機能
+    //  Internationalization (i18n)
     // ------------------------------------
+
+    /**
+     * Loads translation data for the specified language.
+     * @param {string} lang - The language code (e.g., 'en', 'ja').
+     */
     async function loadTranslations(lang) {
         try {
             const response = await fetch(`lang-${lang}.json`);
@@ -57,14 +86,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.lang = currentLanguage;
         } catch (error) {
             console.error('Error loading translations:', error);
-            // 英語へのフォールバック
+            // Fallback to English if translation fails
             if (lang !== 'en') {
                 await loadTranslations('en');
             }
         }
     }
 
-    // 翻訳の適用
+    /**
+     * Applies loaded translations to DOM elements with data-i18n attributes.
+     */
     function applyTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(element => {
             const key = element.getAttribute('data-i18n');
@@ -88,23 +119,88 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 翻訳の初期化
+    // Initialize translations on load
     loadTranslations(currentLanguage);
 
     // ------------------------------------
-    //  リンク表示機能
+    //  Custom Alert/Confirm Modals
     // ------------------------------------
+
+    /**
+     * Displays a custom alert modal.
+     * @param {string} message - The message to display.
+     * @param {string} [titleKey='custom_alert_title'] - The translation key for the modal title.
+     */
+    function showAlert(message, titleKey = 'custom_alert_title') {
+        alertTitle.textContent = translations[titleKey] || 'Alert';
+        alertMessage.textContent = message;
+        customAlertModal.style.display = 'flex';
+    }
+
+    /**
+     * Displays a custom confirmation modal.
+     * @param {string} message - The message to display.
+     * @param {string} [titleKey='custom_confirm_title'] - The translation key for the modal title.
+     * @returns {Promise<boolean>} - A promise that resolves to true if confirmed, false otherwise.
+     */
+    function showConfirm(message, titleKey = 'custom_confirm_title') {
+        confirmTitle.textContent = translations[titleKey] || 'Confirm';
+        confirmMessage.textContent = message;
+        customConfirmModal.style.display = 'flex';
+
+        return new Promise(resolve => {
+            confirmResolve = resolve;
+        });
+    }
+
+    // Event listeners for custom alert/confirm modals
+    alertOkButton.addEventListener('click', () => {
+        customAlertModal.style.display = 'none';
+    });
+
+    closeAlertButton.addEventListener('click', () => {
+        customAlertModal.style.display = 'none';
+    });
+
+    confirmOkButton.addEventListener('click', () => {
+        customConfirmModal.style.display = 'none';
+        if (confirmResolve) {
+            confirmResolve(true);
+        }
+    });
+
+    confirmCancelButton.addEventListener('click', () => {
+        customConfirmModal.style.display = 'none';
+        if (confirmResolve) {
+            confirmResolve(false);
+        }
+    });
+
+    closeConfirmButton.addEventListener('click', () => {
+        customConfirmModal.style.display = 'none';
+        if (confirmResolve) {
+            confirmResolve(false);
+        }
+    });
+
+    // ------------------------------------
+    //  Link Display Functionality
+    // ------------------------------------
+
+    /**
+     * Renders the links in the grid.
+     */
     function renderLinks() {
         linksGrid.innerHTML = '';
 
-        // クリック数でソート（有効な場合）
+        // Sort by clicks if enabled
         let displayedLinks = [...links];
         if (sortByClicksEnabled) {
             displayedLinks.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
         }
 
         displayedLinks.forEach((link, displayIndex) => {
-            const originalIndex = links.indexOf(link);
+            const originalIndex = links.indexOf(link); // Get original index for data manipulation
             const linkButton = document.createElement('a');
             linkButton.href = link.url;
             linkButton.target = '_blank';
@@ -116,21 +212,22 @@ document.addEventListener('DOMContentLoaded', () => {
             linkButton.innerHTML = `
                 <img src="${favicon}" alt="${link.title}" class="icon" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%235f6368\\'%3E%3Cpath d=\\'M0 0h24v24H0z\\' fill=\\'none\\'/\\%3E%3Cpath d=\\'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z\\'/%3E%3Cpath d=\\'M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\\'/%3E%3C/svg%3E';">
                 <div class="title">${link.title}</div>
-                <div class="edit-icon" data-original-index="${originalIndex}">
+                <div class="edit-icon" data-original-index="${originalIndex}" aria-label="Edit Link">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                         <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                     </svg>
                 </div>
             `;
 
-            // クリックイベント
+            // Click event for link buttons
             linkButton.addEventListener('click', (e) => {
+                // If edit icon is clicked, open edit modal
                 if (e.target.closest('.edit-icon')) {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent navigating to the link
                     const originalIndex = parseInt(e.target.closest('.edit-icon').dataset.originalIndex);
                     openEditModal(links[originalIndex], originalIndex);
                 } else {
-                    // クリック数を追跡
+                    // Track clicks for the link
                     links[originalIndex].clicks = (links[originalIndex].clicks || 0) + 1;
                     localStorage.setItem('links', JSON.stringify(links));
                 }
@@ -139,26 +236,39 @@ document.addEventListener('DOMContentLoaded', () => {
             linksGrid.appendChild(linkButton);
         });
 
-        // 新しいリンク追加ボタン
+        // Add new link button
         const addLinkButton = document.createElement('button');
         addLinkButton.className = 'link-button add-button';
         addLinkButton.innerHTML = '+';
-        addLinkButton.addEventListener('click', () => openEditModal(null, -1));
+        addLinkButton.setAttribute('aria-label', translations.add_button_text || 'Add New Link'); // Accessibility
+        addLinkButton.addEventListener('click', () => openEditModal(null, NEW_LINK_INDEX));
         linksGrid.appendChild(addLinkButton);
     }
 
+    /**
+     * Generates a favicon URL for a given URL.
+     * @param {string} url - The URL to get the favicon for.
+     * @returns {string} The favicon URL or an empty string if the URL is invalid.
+     */
     function getFaviconUrl(url) {
         try {
             const parsedUrl = new URL(url);
             return `https://www.google.com/s2/favicons?domain=${parsedUrl.hostname}&sz=48`;
         } catch (e) {
-            return '';
+            console.error('Invalid URL for favicon:', url, e);
+            return ''; // Return empty string on error
         }
     }
 
     // ------------------------------------
-    //  モーダル管理
+    //  Modal Management
     // ------------------------------------
+
+    /**
+     * Opens the edit link modal.
+     * @param {object|null} link - The link object to edit, or null for a new link.
+     * @param {number} index - The index of the link in the `links` array, or NEW_LINK_INDEX for a new link.
+     */
     function openEditModal(link, index) {
         if (link) {
             modalLinkUrl.value = link.url;
@@ -166,32 +276,63 @@ document.addEventListener('DOMContentLoaded', () => {
             modalLinkIcon.value = link.icon || '';
             modalLinkIndex.value = index;
             deleteLinkButton.style.display = 'inline-block';
+            editModal.querySelector('h2').textContent = translations.edit_link_title || 'Edit Link'; // Update modal title
         } else {
             modalLinkUrl.value = '';
             modalLinkTitle.value = '';
             modalLinkIcon.value = '';
-            modalLinkIndex.value = '-1';
+            modalLinkIndex.value = NEW_LINK_INDEX;
             deleteLinkButton.style.display = 'none';
+            editModal.querySelector('h2').textContent = translations.add_new_link_title || 'Add New Link'; // Update modal title
         }
         editModal.style.display = 'flex';
         modalLinkUrl.focus();
     }
 
+    /**
+     * Closes the edit link modal.
+     */
     function closeEditModal() {
         editModal.style.display = 'none';
     }
 
+    /**
+     * Closes the settings modal.
+     */
     function closeSettingsModal() {
         settingsModal.style.display = 'none';
     }
 
     // ------------------------------------
-    //  検索機能
+    //  Search Functionality
     // ------------------------------------
+
+    /**
+     * Performs a search using the selected search engine.
+     */
     function performSearch() {
         const query = searchInput.value.trim();
         if (query) {
-            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            let searchUrl;
+            // Check if the query is a valid URL
+            if (URL_REGEX.test(query)) {
+                // Prepend 'https://' if missing for direct navigation
+                searchUrl = query.startsWith('http') ? query : `https://${query}`;
+            } else {
+                // Perform search based on selected engine
+                switch (currentSearchEngine) {
+                    case 'bing':
+                        searchUrl = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+                        break;
+                    case 'yahoo':
+                        searchUrl = `https://search.yahoo.com/search?p=${encodeURIComponent(query)}`;
+                        break;
+                    case 'google':
+                    default:
+                        searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                        break;
+                }
+            }
             window.open(searchUrl, '_blank');
             addToSearchHistory(query);
             searchInput.value = '';
@@ -199,6 +340,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    /**
+     * Displays search suggestions based on the query.
+     * @param {string} query - The current search input query.
+     */
     function showSuggestions(query) {
         if (!suggestionsBox) return;
 
@@ -219,12 +364,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let combinedSuggestions = [];
 
-        // 履歴を追加
+        // Add history items
         filteredHistory.forEach(item => {
             combinedSuggestions.push({ type: 'history', text: item });
         });
 
-        // 固定サジェストを追加
+        // Add fixed suggestions
         filteredSuggestions.forEach(item => {
             combinedSuggestions.push({ type: 'suggestion', text: item });
         });
@@ -248,6 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestionItem.appendChild(textSpan);
 
             suggestionItem.addEventListener('click', (e) => {
+                // Prevent click on suggestion item if delete button is clicked
                 if (e.target.classList.contains('delete-history-btn') || 
                     e.target.closest('.delete-history-btn')) {
                     return;
@@ -262,8 +408,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteBtn.classList.add('delete-history-btn');
                 deleteBtn.innerHTML = '&times;';
                 deleteBtn.title = translations.delete_history_title || 'Delete from history';
+                deleteBtn.setAttribute('aria-label', translations.delete_history_title || 'Delete from history'); // Accessibility
                 deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent triggering suggestion item click
                     deleteSearchHistoryItem(item.text);
                 });
                 suggestionItem.appendChild(deleteBtn);
@@ -275,6 +422,9 @@ document.addEventListener('DOMContentLoaded', () => {
         suggestionsBox.classList.add('visible');
     }
 
+    /**
+     * Hides search suggestions.
+     */
     function hideSuggestions() {
         if (!suggestionsBox) return;
         suggestionsBox.classList.remove('visible');
@@ -282,6 +432,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSelectedSuggestion = -1;
     }
 
+    /**
+     * Navigates through search suggestions using arrow keys.
+     * @param {number} direction - 1 for down, -1 for up.
+     */
     function navigateSuggestions(direction) {
         if (!suggestionsBox) return;
 
@@ -307,8 +461,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  検索履歴管理
+    //  Search History Management
     // ------------------------------------
+
+    /**
+     * Adds a query to the search history.
+     * @param {string} query - The search query to add.
+     */
     function addToSearchHistory(query) {
         const normalizedQuery = query.toLowerCase();
         searchHistory = searchHistory.filter(item => item.toLowerCase() !== normalizedQuery);
@@ -317,28 +476,43 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
     }
 
+    /**
+     * Deletes an item from the search history.
+     * @param {string} value - The item to delete from history.
+     */
     function deleteSearchHistoryItem(value) {
         searchHistory = searchHistory.filter(item => item !== value);
         localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
-        showSuggestions(searchInput.value.trim());
+        showSuggestions(searchInput.value.trim()); // Re-render suggestions after deletion
     }
 
     // ------------------------------------
-    //  タイトル取得機能
+    //  Title Fetching Functionality
     // ------------------------------------
+
+    /**
+     * Fetches the title from a given URL using a proxy.
+     * @param {string} url - The URL to fetch the title from.
+     */
     async function fetchTitleFromUrl(url) {
         if (!url) {
-            alert(translations.alert_url_required_for_title_fetch || 'URLを入力してください');
+            showAlert(translations.alert_url_required_for_title_fetch || 'Please enter a URL.');
+            return;
+        }
+
+        if (!URL_REGEX.test(url)) {
+            showAlert(translations.alert_invalid_url_format || 'Invalid URL format. Please enter a valid URL.');
             return;
         }
 
         const originalButtonContent = fetchTitleButton.innerHTML;
         const originalButtonTitle = fetchTitleButton.title;
         fetchTitleButton.disabled = true;
-        fetchTitleButton.innerHTML = translations.fetching_title || '取得中...';
-        fetchTitleButton.title = translations.fetching_title_tooltip || 'タイトル取得中';
+        fetchTitleButton.innerHTML = translations.fetching_title || 'Fetching...';
+        fetchTitleButton.title = translations.fetching_title_tooltip || 'Fetching title';
 
         try {
+            // Using AllOrigins proxy to bypass CORS issues for title fetching
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
             const response = await fetch(proxyUrl);
             const data = await response.json();
@@ -350,14 +524,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (title) {
                     modalLinkTitle.value = title.trim();
                 } else {
-                    alert(translations.alert_no_title_found || 'タイトルが見つかりませんでした');
+                    showAlert(translations.alert_no_title_found || 'Title not found.');
                 }
             } else {
-                alert(translations.alert_failed_to_fetch_title || 'タイトルの取得に失敗しました');
+                showAlert(translations.alert_failed_to_fetch_title || 'Failed to fetch title.');
             }
         } catch (error) {
             console.error('Error fetching title:', error);
-            alert((translations.alert_error_fetching_title || 'タイトル取得エラー') + `\n${error.message}`);
+            showAlert((translations.alert_error_fetching_title || 'Error fetching title') + `\n${error.message}`);
         } finally {
             fetchTitleButton.disabled = false;
             fetchTitleButton.innerHTML = originalButtonContent;
@@ -366,14 +540,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  データ管理機能
+    //  Data Management Functionality
     // ------------------------------------
+
+    /**
+     * Exports current data (links, search history, settings) to a JSON file.
+     */
     function exportData() {
         const data = {
             links: links,
             searchHistory: searchHistory,
             sortByClicksEnabled: sortByClicksEnabled,
-            language: currentLanguage
+            language: currentLanguage,
+            searchEngine: currentSearchEngine
         };
         const dataStr = JSON.stringify(data, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
@@ -385,9 +564,13 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        alert(translations.alert_data_exported || 'データをエクスポートしました');
+        showAlert(translations.alert_data_exported || 'Data exported successfully.');
     }
 
+    /**
+     * Imports data from a selected JSON file.
+     * @param {Event} event - The file input change event.
+     */
     function importData(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -400,44 +583,69 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (importedData.links && Array.isArray(importedData.links)) {
                     links = importedData.links;
                 } else {
-                    alert(translations.alert_import_links_corrupted || 'リンクデータが破損しています');
-                    return;
+                    showAlert(translations.alert_import_links_corrupted || 'Link data is corrupted.');
+                    // Do not return here, try to import other settings if possible
                 }
 
                 if (importedData.searchHistory && Array.isArray(importedData.searchHistory)) {
                     searchHistory = importedData.searchHistory;
+                } else {
+                    console.warn('Search history data missing or corrupted during import.');
                 }
 
                 if (typeof importedData.sortByClicksEnabled === 'boolean') {
                     sortByClicksEnabled = importedData.sortByClicksEnabled;
+                } else {
+                    console.warn('Sort by clicks setting missing or corrupted during import.');
                 }
 
                 if (typeof importedData.language === 'string') {
                     currentLanguage = importedData.language;
                     languageSelector.value = currentLanguage;
                     loadTranslations(currentLanguage);
+                } else {
+                    console.warn('Language setting missing or corrupted during import.');
+                }
+                
+                // Import search engine setting
+                if (typeof importedData.searchEngine === 'string') {
+                    currentSearchEngine = importedData.searchEngine;
+                    searchEngineSelector.value = currentSearchEngine;
+                } else {
+                    console.warn('Search engine setting missing or corrupted during import.');
                 }
 
                 localStorage.setItem('links', JSON.stringify(links));
                 localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
                 localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
                 localStorage.setItem('language', currentLanguage);
+                localStorage.setItem('searchEngine', currentSearchEngine);
 
                 renderLinks();
-                alert(translations.alert_data_imported || 'データをインポートしました');
+                showAlert(translations.alert_data_imported_success || 'Data imported successfully.');
                 closeSettingsModal();
             } catch (error) {
-                alert((translations.alert_import_failed || 'インポートに失敗しました') + `\n${error.message}`);
+                if (error instanceof SyntaxError) {
+                    showAlert(translations.alert_import_data_parse_error || 'Failed to parse JSON file. The file may be corrupted or in an invalid format.');
+                } else {
+                    showAlert((translations.alert_import_failed || 'Import failed') + `\n${error.message}`);
+                }
                 console.error('Error importing data:', error);
             }
         };
         reader.readAsText(file);
-        importFileInput.value = '';
+        importFileInput.value = ''; // Clear file input after reading
     }
 
     // ------------------------------------
-    //  ユーティリティ関数
+    //  Utility Functions
     // ------------------------------------
+
+    /**
+     * Creates a DOM element from an HTML string.
+     * @param {string} htmlString - The HTML string.
+     * @returns {Node} The first child node created from the HTML string.
+     */
     function createElementFromHTML(htmlString) {
         const template = document.createElement('template');
         template.innerHTML = htmlString.trim();
@@ -445,12 +653,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ------------------------------------
-    //  イベントリスナー
+    //  Event Listeners
     // ------------------------------------
     
-    // モーダル関連
+    // Modal related event listeners
     closeModalButton.addEventListener('click', closeEditModal);
     
+    // Close modals when clicking outside their content
     window.addEventListener('click', (event) => {
         if (event.target === editModal) {
             closeEditModal();
@@ -458,9 +667,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.target === settingsModal) {
             closeSettingsModal();
         }
+        if (event.target === customAlertModal) {
+            customAlertModal.style.display = 'none';
+        }
+        if (event.target === customConfirmModal) {
+            customConfirmModal.style.display = 'none';
+            if (confirmResolve) {
+                confirmResolve(false); // Resolve with false if confirm modal is closed by clicking outside
+            }
+        }
     });
 
-    // リンク保存
+    // Save link button handler
     saveLinkButton.addEventListener('click', () => {
         const url = modalLinkUrl.value.trim();
         const title = modalLinkTitle.value.trim();
@@ -468,15 +686,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = parseInt(modalLinkIndex.value);
 
         if (!url || !title) {
-            alert(translations.alert_url_title_required || 'URLとタイトルは必須です');
+            showAlert(translations.alert_url_title_required || 'URL and Title are required.');
+            return;
+        }
+
+        // Basic URL validation
+        if (!URL_REGEX.test(url)) {
+            showAlert(translations.alert_invalid_url_format || 'Invalid URL format. Please enter a valid URL.');
             return;
         }
 
         const newLink = { url, title, icon, clicks: 0 };
 
-        if (index === -1) {
+        if (index === NEW_LINK_INDEX) {
             links.push(newLink);
         } else {
+            // Preserve existing click count when updating a link
             newLink.clicks = links[index].clicks;
             links[index] = newLink;
         }
@@ -486,10 +711,13 @@ document.addEventListener('DOMContentLoaded', () => {
         closeEditModal();
     });
 
-    // リンク削除
-    deleteLinkButton.addEventListener('click', () => {
+    // Delete link button handler
+    deleteLinkButton.addEventListener('click', async () => {
         const index = parseInt(modalLinkIndex.value);
-        if (index !== -1 && confirm(translations.confirm_delete_link || 'このリンクを削除しますか？')) {
+        // Use custom confirm modal
+        const confirmed = await showConfirm(translations.confirm_delete_link || 'Are you sure you want to delete this link?');
+        
+        if (confirmed && index !== NEW_LINK_INDEX) {
             links.splice(index, 1);
             localStorage.setItem('links', JSON.stringify(links));
             renderLinks();
@@ -497,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 検索関連
+    // Search input event listeners
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim();
         if (query.length > 0) {
@@ -509,6 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission if inside a form
             const selectedSuggestion = suggestionsBox?.querySelector('.suggestion-item.selected');
             if (selectedSuggestion) {
                 searchInput.value = selectedSuggestion.querySelector('.text-content').textContent;
@@ -516,41 +745,51 @@ document.addEventListener('DOMContentLoaded', () => {
             performSearch();
             hideSuggestions();
         } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
+            e.preventDefault(); // Prevent cursor movement in input
             navigateSuggestions(1);
         } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
+            e.preventDefault(); // Prevent cursor movement in input
             navigateSuggestions(-1);
         }
     });
 
+    // Search button click handler (also handles form submission if wrapped in <form>)
     searchButton.addEventListener('click', performSearch);
 
-    // 設定関連
+    // Handle search engine selector change
+    searchEngineSelector.addEventListener('change', (event) => {
+        currentSearchEngine = event.target.value;
+        localStorage.setItem('searchEngine', currentSearchEngine);
+    });
+
+    // Settings button click handler
     settingsButton.addEventListener('click', () => {
         sortByClicksCheckbox.checked = sortByClicksEnabled;
         languageSelector.value = currentLanguage;
         settingsModal.style.display = 'flex';
     });
 
+    // Close settings button handler
     closeSettingsButton.addEventListener('click', closeSettingsModal);
 
+    // Language selector change handler
     languageSelector.addEventListener('change', (event) => {
         currentLanguage = event.target.value;
         localStorage.setItem('language', currentLanguage);
         loadTranslations(currentLanguage);
     });
 
+    // Save settings button handler
     saveSettingsButton.addEventListener('click', () => {
         sortByClicksEnabled = sortByClicksCheckbox.checked;
         localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
         
-        alert(translations.alert_settings_saved || '設定を保存しました');
-        renderLinks();
+        showAlert(translations.alert_settings_saved || 'Settings saved.');
+        renderLinks(); // Re-render links if sorting preference changed
         closeSettingsModal();
     });
 
-    // データ管理
+    // Data management buttons
     exportDataButton.addEventListener('click', exportData);
     importDataButton.addEventListener('click', () => importFileInput.click());
     importFileInput.addEventListener('change', importData);
@@ -559,6 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchTitleFromUrl(url);
     });
 
-    // 初期表示
-    renderLinks();
+    // Initial display setup
+    searchEngineSelector.value = currentSearchEngine; // Set initial selected search engine
+    renderLinks(); // Render links on page load
 });

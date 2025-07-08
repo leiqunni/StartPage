@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title data-i18n="new_tab_title">New Tab</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234285F4' d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z'/%3E%3Cpath fill='%23FBBC05' d='M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z'/%3E%3Cpath fill='%23EA4335' d='M12 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z'/%3E%3C/svg%3E">
+</head>
+<body>
+    <div class="header-links">
+        <a href="https://mail.google.com/" target="_blank" data-i18n="gmail">Gmail</a>
+        <a href="https://images.google.com/" target="_blank" data-i18n="image_search">Image Search</a>
+        <button id="settings-button" data-i18n="settings">Settings</button>
+    </div>
+
+    <main>
+        <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google" class="google-logo">
+        <div class="search-area">
+            <div class="search-input-wrapper">
+                <button id="current-search-engine-button" class="search-engine-selector" data-i18n-title="select_search_engine_tooltip">
+                    <img id="current-search-engine-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234285F4'%3E%3Cpath d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z'/%3E%3Cpath d='M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z'/%3E%3C/svg%3E" alt="Google">
+                    <span id="current-search-engine-name" data-i18n="Google Search_engine_name">Google</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </button>
+                <input type="search" id="google-search-input" data-i18n-placeholder="search_placeholder" autocomplete="off">
+                <button id="search-button">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="suggestions-box" class="suggestions-box"></div>
+            <div id="search-engine-selector-dropdown" class="suggestions-box"></div>
+        </div>
+
+        <div id="links-grid">
+            </div>
+
+        <button id="add-link-button" class="add-button" data-i18n="add_button_text">+</button>
+    </main>
+
+	<div id="edit-modal" class="modal">
+		<div class="modal-content">
+			<span class="close-button">&times;</span>
+			<h2 id="modal-title" data-i18n="add_new_link_title">Add New Link</h2>
+			<input type="hidden" id="modal-link-index">
+			<div class="form-group">
+				<label for="modal-link-url" data-i18n="url_label">URL:</label>
+				<input type="url" id="modal-link-url" required>
+			</div>
+			<div class="form-group">
+				<label for="modal-link-title" data-i18n="title_label">Title:</label>
+				<input type="text" id="modal-link-title" required>
+				<button id="fetch-title-button" class="small-button" data-i18n="fetch_title_button_title">Fetch Title from URL</button>
+			</div>
+			<div class="form-group">
+				<label for="modal-link-icon" data-i18n="icon_url_label">Icon URL (Optional):</label>
+				<input type="url" id="modal-link-icon">
+			</div>
+			<div class="modal-buttons">
+				<button id="save-link-button" data-i18n="save_button">Save</button>
+				<button id="delete-link-button" class="delete-button" data-i18n="delete_button">Delete</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="settings-modal" class="modal">
+		<div class="modal-content">
+			<span class="close-button" id="close-settings-button">&times;</span>
+			<h2 data-i18n="settings">Settings</h2>
+			<div class="setting-item">
+				<label for="sort-by-clicks-checkbox" data-i18n="sort_by_clicks_checkbox_label">Enable sorting by clicks:</label>
+				<input type="checkbox" id="sort-by-clicks-checkbox">
+			</div>
+
+			<div class="setting-item">
+				<label for="links-per-row-input" data-i18n="links_per_row_label">Links per row:</label>
+				<input type="number" id="links-per-row-input" min="1" max="20">
+			</div>
+
+			<div class="setting-item">
+				<label for="number-of-rows-input" data-i18n="number_of_rows_label">Number of rows:</label>
+				<input type="number" id="number-of-rows-input" min="1" max="20">
+			</div>
+
+			<div class="setting-item">
+				<label for="language-selector" data-i18n="language_selection_label">Language:</label>
+				<select id="language-selector">
+					<option value="en">English</option>
+					<option value="ja">日本語</option>
+					<option value="zh-Hant">繁體中文</option>
+				</select>
+			</div>
+
+			<div class="modal-buttons">
+				<button id="save-settings-button" data-i18n="save_settings_button">Save Settings</button>
+			</div>
+
+			<h3 data-i18n="search_engine_management_heading">Search Engine Management</h3>
+            <div id="search-engines-list">
+                </div>
+            <div class="data-management-buttons">
+                <input type="text" id="opensearch-url-input" placeholder="OpenSearch XML URL">
+                <button id="add-opensearch-url-button" data-i18n="add_opensearch_url_button">Add from URL</button>
+                <input type="file" id="opensearch-file-input" accept=".xml" style="display: none;">
+                <button id="import-opensearch-file-button" data-i18n="import_opensearch_file_button">Add from File</button>
+            </div>
+
+			<h3 data-i18n="data_management_heading">Data Management</h3>
+			<div class="data-management-buttons">
+				<button id="export-data-button" data-i18n="export_data_button">Export Data</button>
+				<input type="file" id="import-file-input" accept=".json" style="display: none;">
+				<button id="import-data-button" data-i18n="import_data_button">Import Data</button>
+			</div>
+			<div class="data-management-buttons">
+				<button id="delete-all-data-button" class="delete-button" data-i18n="delete_all_data_button">Delete All Data</button>
+			</div>
+		</div>
+	</div>
+
+	<script src="script.js"></script>
+</body>
+</html>

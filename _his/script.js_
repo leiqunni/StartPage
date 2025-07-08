@@ -1,0 +1,910 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // DOM要素の取得
+    const linksGrid = document.getElementById('links-grid');
+    const searchInput = document.getElementById('google-search-input');
+    const searchButton = document.getElementById('search-button');
+    const suggestionsBox = document.getElementById('suggestions-box');
+    const editModal = document.getElementById('edit-modal');
+    const closeModalButton = editModal.querySelector('.close-button');
+    const saveLinkButton = document.getElementById('save-link-button');
+    const deleteLinkButton = document.getElementById('delete-link-button');
+    const modalLinkUrl = document.getElementById('modal-link-url');
+    const modalLinkTitle = document.getElementById('modal-link-title');
+    const modalLinkIcon = document.getElementById('modal-link-icon');
+    const modalLinkIndex = document.getElementById('modal-link-index');
+    const fetchTitleButton = document.getElementById('fetch-title-button');
+    const addLinkButton = document.getElementById('add-link-button');
+ 
+    // 設定モーダル要素
+    const settingsButton = document.getElementById('settings-button');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsButton = document.getElementById('close-settings-button');
+    const sortByClicksCheckbox = document.getElementById('sort-by-clicks-checkbox');
+    const linksPerRowInput = document.getElementById('links-per-row-input');
+    const numberOfRowsInput = document.getElementById('number-of-rows-input');
+    const saveSettingsButton = document.getElementById('save-settings-button');
+    const languageSelector = document.getElementById('language-selector');
+    const exportDataButton = document.getElementById('export-data-button');
+    const importFileInput = document.getElementById('import-file-input');
+    const importDataButton = document.getElementById('import-data-button');
+    const deleteAllDataButton = document.getElementById('delete-all-data-button');
+
+    // OpenSearch 関連の要素
+    const opensearchUrlInput = document.getElementById('opensearch-url-input');
+    const addOpensearchUrlButton = document.getElementById('add-opensearch-url-button');
+    const opensearchFileInput = document.getElementById('opensearch-file-input');
+    const importOpensearchFileButton = document.getElementById('import-opensearch-file-button');
+    const searchEnginesList = document.getElementById('search-engines-list');
+    const currentSearchEngineButton = document.getElementById('current-search-engine-button');
+    const currentSearchEngineIcon = document.getElementById('current-search-engine-icon');
+    const currentSearchEngineName = document.getElementById('current-search-engine-name');
+    const searchEngineSelectorDropdown = document.getElementById('search-engine-selector-dropdown');
+
+
+    // 設定の初期値と保存
+    let links = JSON.parse(localStorage.getItem('links')) || [];
+    let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+    let sortByClicksEnabled = localStorage.getItem('sortByClicksEnabled') === 'true';
+    let linksPerRow = parseInt(localStorage.getItem('linksPerRow')) || 5;
+    let numberOfRows = parseInt(localStorage.getItem('numberOfRows')) || 3;
+    let currentLanguage = localStorage.getItem('language') || 'en';
+
+    // Setting for search engines
+    let searchEngines = JSON.parse(localStorage.getItem('searchEngines')) || [
+        { name: 'Google', url: 'https://www.google.com/search?q={searchTerms}', icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%234285F4\'%3E%3Cpath d=\'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z\'/%3E%3Cpath d=\'M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\'/%3E%3C/svg%3E', isDefault: true },
+    ];
+    let currentSearchEngineIndex = parseInt(localStorage.getItem('currentSearchEngineIndex')) || 0;
+
+    const MAX_SEARCH_HISTORY = 10;
+    const MAX_LINKS_DISPLAY = linksPerRow * numberOfRows; // 実際に表示するリンクの最大数
+
+    let currentSelectedSuggestion = -1; // For keyboard navigation of suggestions
+    let translations = {}; // 翻訳データを格納するオブジェクト
+
+    // 関数定義
+
+    // 翻訳のロードと適用
+    async function loadTranslations(lang) {
+        try {
+            const response = await fetch(`lang-${lang}.json`);
+            translations = await response.json();
+            applyTranslations();
+        } catch (error) {
+            console.error('Error loading translations:', error);
+            // Fallback to English if specified language fails
+            if (lang !== 'en') {
+                loadTranslations('en');
+            }
+        }
+    }
+
+    function applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.dataset.i18n;
+            if (translations[key]) {
+                element.textContent = translations[key];
+            }
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+            const key = element.dataset.i18n-placeholder;
+            if (translations[key]) {
+                element.placeholder = translations[key];
+            }
+        });
+        document.querySelectorAll('[data-i18n-title]').forEach(element => {
+            const key = element.dataset.i18n-title;
+            if (translations[key]) {
+                element.title = translations[key];
+            }
+        });
+        // 検索エンジン名も更新
+        updateCurrentSearchEngineDisplay();
+    }
+
+
+    // リンクの表示
+    function renderLinks() {
+        linksGrid.innerHTML = ''; // Clear existing links
+
+        // ソートが有効な場合、クリック数でソート
+        const sortedLinks = sortByClicksEnabled ? [...links].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)) : links;
+
+        const linksToDisplay = sortedLinks.slice(0, MAX_LINKS_DISPLAY);
+
+        linksToDisplay.forEach((link, index) => {
+            const linkItem = document.createElement('a');
+            linkItem.href = link.url;
+            linkItem.className = 'link-item';
+            linkItem.target = '_blank'; // Open in new tab
+            linkItem.dataset.index = links.indexOf(link); // Use original index for editing/deleting
+
+            // Click tracking
+            linkItem.addEventListener('click', () => {
+                link.clicks = (link.clicks || 0) + 1;
+                localStorage.setItem('links', JSON.stringify(links));
+                if (sortByClicksEnabled) {
+                    renderLinks(); // Re-render to update order
+                }
+            });
+
+            const linkIcon = document.createElement('img');
+            linkIcon.className = 'link-icon';
+            linkIcon.src = link.icon || getFaviconUrl(link.url);
+            linkIcon.alt = link.title;
+            linkIcon.onerror = function() {
+                this.onerror = null; // Prevent infinite loop if default icon also fails
+                this.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%235f6368\'%3E%3Cpath d=\'M0 0h24v24H0z\' fill=\'none\'/%3E%3Cpath d=\'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z\'/%3E%3Cpath d=\'M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\'/%3E%3C/svg%3E'; // Generic globe icon
+            };
+
+
+            const linkTitle = document.createElement('span');
+            linkTitle.textContent = link.title;
+
+            const editButton = document.createElement('button');
+            editButton.className = 'edit-link-button';
+            editButton.innerHTML = '&#9998;'; // Pencil icon
+            editButton.title = translations.edit_link_title || 'Edit Link';
+            editButton.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent opening the link
+                e.stopPropagation(); // Prevent click tracking
+                openEditModal(parseInt(linkItem.dataset.index));
+            });
+
+            linkItem.appendChild(linkIcon);
+            linkItem.appendChild(linkTitle);
+            linkItem.appendChild(editButton);
+            linksGrid.appendChild(linkItem);
+        });
+    }
+
+    // Favicon URLの取得（Google S2 Favicon APIを使用）
+    function getFaviconUrl(url) {
+        try {
+            const domain = new URL(url).hostname;
+            return `https://t1.gstatic.com/faviconV2?url=http://${domain}&size=64`;
+        } catch (e) {
+            return ''; // Return empty string or a default local icon path
+        }
+    }
+
+    // 検索実行
+    function performSearch() {
+        const query = searchInput.value.trim();
+        if (query) {
+            const currentEngine = searchEngines[currentSearchEngineIndex];
+            if (!currentEngine) {
+                alert(translations.alert_no_search_engine_selected || 'No search engine selected. Please configure in settings.');
+                return;
+            }
+            const searchUrl = currentEngine.url.replace('{searchTerms}', encodeURIComponent(query));
+            window.open(searchUrl, '_blank');
+            addToSearchHistory(query);
+            searchInput.value = '';
+            hideSuggestions();
+        }
+    }
+
+    // 検索履歴に追加
+    function addToSearchHistory(query) {
+        // 既存の履歴から重複を削除
+        searchHistory = searchHistory.filter(item => item !== query);
+        // 新しいクエリを先頭に追加
+        searchHistory.unshift(query);
+        // 最大数を制限
+        if (searchHistory.length > MAX_SEARCH_HISTORY) {
+            searchHistory = searchHistory.slice(0, MAX_SEARCH_HISTORY);
+        }
+        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+    }
+
+    // サジェスチョンの表示
+    function showSuggestions(query) {
+        suggestionsBox.innerHTML = '';
+        currentSelectedSuggestion = -1;
+
+        const lowerCaseQuery = query.toLowerCase();
+
+        // Fixed suggestions and their relevance
+        const fixedSuggestions = [
+            'gmail.com', 'youtube.com', 'facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com',
+            'amazon.com', 'wikipedia.org', 'reddit.com', 'netflix.com', 'google.com/maps', 'google.com/drive'
+        ];
+
+        // Combine history and fixed suggestions, filter and rank
+        let allSuggestions = [];
+
+        // Add history suggestions
+        searchHistory.forEach(item => {
+            if (item.toLowerCase().includes(lowerCaseQuery)) {
+                allSuggestions.push({ text: item, type: 'history' });
+            }
+        });
+
+        // Add fixed suggestions, avoiding duplicates and prioritizing exact matches
+        fixedSuggestions.forEach(item => {
+            if (item.toLowerCase().includes(lowerCaseQuery) && !searchHistory.includes(item)) {
+                allSuggestions.push({ text: item, type: 'suggestion' });
+            }
+        });
+
+        if (query) { // Add current query as a direct search option if there's a query
+             allSuggestions.unshift({ text: query, type: 'search' });
+        }
+
+
+        // Remove duplicates based on text
+        const uniqueSuggestions = [];
+        const seen = new Set();
+        for (const item of allSuggestions) {
+            if (!seen.has(item.text)) {
+                uniqueSuggestions.push(item);
+                seen.add(item.text);
+            }
+        }
+
+
+        if (uniqueSuggestions.length > 0) {
+            uniqueSuggestions.forEach((item, index) => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.className = 'suggestion-item';
+                suggestionItem.dataset.index = index; // Store index for navigation
+
+                const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('width', '20');
+                icon.setAttribute('height', '20');
+
+                let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                if (item.type === 'history') {
+                    icon.classList.add('icon-history');
+                    path.setAttribute('d', 'M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.51 0-2.91-.49-4.06-1.3l-1.42 1.42C9.57 19.95 10.74 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 16c-3.87 0-7-3.13-7-7h3L8 8.89 10.89 12H13c3.87 0 7-3.13 7-7s-3.13-7-7-7z');
+                } else { // 'suggestion' or 'search'
+                    icon.classList.add('icon-search');
+                    path.setAttribute('d', 'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z');
+                }
+                icon.appendChild(path);
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = item.text;
+
+                suggestionItem.appendChild(icon);
+                suggestionItem.appendChild(textSpan);
+
+                // Add delete button for history items
+                if (item.type === 'history') {
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'delete-button';
+                    deleteButton.innerHTML = '&times;'; // Multiplication sign for close
+                    deleteButton.title = translations.delete_history_title || 'Delete from history';
+                    deleteButton.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent triggering the suggestion click
+                        deleteSearchHistoryItem(item.text);
+                    });
+                    suggestionItem.appendChild(deleteButton);
+                }
+
+                suggestionItem.addEventListener('click', () => {
+                    searchInput.value = item.text;
+                    performSearch();
+                });
+                suggestionsBox.appendChild(suggestionItem);
+            });
+            suggestionsBox.classList.add('visible');
+        } else {
+            hideSuggestions();
+        }
+    }
+
+
+    // サジェスチョンの非表示
+    function hideSuggestions() {
+        if (!suggestionsBox) return;
+        suggestionsBox.classList.remove('visible');
+        suggestionsBox.innerHTML = '';
+        currentSelectedSuggestion = -1;
+        searchEngineSelectorDropdown.classList.remove('visible'); // Close search engine dropdown too
+    }
+
+    // 検索履歴アイテムの削除
+    function deleteSearchHistoryItem(value) {
+        searchHistory = searchHistory.filter(item => item !== value);
+        localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+        // Re-show suggestions to update the list
+        showSuggestions(searchInput.value);
+    }
+
+    // サジェスチョンのキーボードナビゲーション
+    function navigateSuggestions(direction) {
+        const items = suggestionsBox.querySelectorAll('.suggestion-item');
+        if (items.length === 0) return;
+
+        // Remove selection from current item
+        if (currentSelectedSuggestion !== -1) {
+            items[currentSelectedSuggestion].classList.remove('selected');
+        }
+
+        currentSelectedSuggestion += direction;
+
+        // Wrap around
+        if (currentSelectedSuggestion >= items.length) {
+            currentSelectedSuggestion = 0;
+        } else if (currentSelectedSuggestion < 0) {
+            currentSelectedSuggestion = items.length - 1;
+        }
+
+        // Add selection to new item
+        items[currentSelectedSuggestion].classList.add('selected');
+        // Update input field with selected suggestion text
+        searchInput.value = items[currentSelectedSuggestion].textContent.replace('×', '').trim(); // Remove the 'x' for delete button
+    }
+
+    // リンク編集モーダルを開く
+    function openEditModal(index = -1) {
+        // Reset validation styles
+        modalLinkUrl.classList.remove('invalid');
+        modalLinkTitle.classList.remove('invalid');
+
+        if (index === -1) {
+            // Add new link
+            document.getElementById('modal-title').textContent = translations.add_new_link_title || 'Add New Link';
+            modalLinkUrl.value = '';
+            modalLinkTitle.value = '';
+            modalLinkIcon.value = '';
+            modalLinkIndex.value = '';
+            deleteLinkButton.style.display = 'none'; // Hide delete button for new links
+        } else {
+            // Edit existing link
+            document.getElementById('modal-title').textContent = translations.edit_link_title || 'Edit Link';
+            const link = links[index];
+            modalLinkUrl.value = link.url;
+            modalLinkTitle.value = link.title;
+            modalLinkIcon.value = link.icon || '';
+            modalLinkIndex.value = index;
+            deleteLinkButton.style.display = 'inline-block'; // Show delete button for existing links
+        }
+        editModal.style.display = 'flex';
+    }
+
+    // リンク編集モーダルを閉じる
+    function closeEditModal() {
+        editModal.style.display = 'none';
+        modalLinkUrl.classList.remove('invalid');
+        modalLinkTitle.classList.remove('invalid');
+    }
+
+    // 設定モーダルを閉じる
+    function closeSettingsModal() {
+        settingsModal.style.display = 'none';
+    }
+
+    // URLからタイトルを取得
+    async function fetchTitleFromUrl(url) {
+        if (!url) {
+            alert(translations.alert_enter_url_for_title_fetch || 'Please enter a URL to fetch its title.');
+            return;
+        }
+        try {
+            // Using a proxy to bypass CORS issues for fetching external content
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.contents, 'text/html');
+            const title = doc.querySelector('title')?.textContent || url;
+            modalLinkTitle.value = title.trim();
+
+            // Try to get favicon from the URL's domain
+            modalLinkIcon.value = getFaviconUrl(url);
+
+        } catch (error) {
+            console.error('Error fetching title:', error);
+            alert((translations.alert_title_fetch_failed || 'Failed to fetch title. Please enter manually.') + `\n${error.message}`);
+            modalLinkTitle.value = url; // Fallback to URL as title
+        }
+    }
+
+    // データのエクスポート
+    function exportData() {
+        const data = {
+            links: links,
+            searchHistory: searchHistory,
+            sortByClicksEnabled: sortByClicksEnabled,
+            linksPerRow: linksPerRow,
+            numberOfRows: numberOfRows,
+            language: currentLanguage,
+            searchEngines: searchEngines,
+            currentSearchEngineIndex: currentSearchEngineIndex
+        };
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'new_tab_data.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // データのインポート
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedData = JSON.parse(e.target.result);
+
+                if (importedData.links && Array.isArray(importedData.links)) {
+                    links = importedData.links;
+                } else {
+                    alert(translations.alert_import_data_invalid_format || 'The imported JSON format is incorrect for links.');
+                    return;
+                }
+                if (importedData.searchHistory && Array.isArray(importedData.searchHistory)) {
+                    searchHistory = importedData.searchHistory;
+                }
+                if (typeof importedData.sortByClicksEnabled === 'boolean') {
+                    sortByClicksEnabled = importedData.sortByClicksEnabled;
+                }
+                if (typeof importedData.linksPerRow === 'number') {
+                    linksPerRow = importedData.linksPerRow;
+                }
+                if (typeof importedData.numberOfRows === 'number') {
+                    numberOfRows = importedData.numberOfRows;
+                }
+                if (typeof importedData.language === 'string') {
+                    currentLanguage = importedData.language;
+                    loadTranslations(currentLanguage); // Reload translations if language changed
+                }
+                if (importedData.searchEngines && Array.isArray(importedData.searchEngines)) {
+                    searchEngines = importedData.searchEngines;
+                }
+                if (typeof importedData.currentSearchEngineIndex === 'number') {
+                    currentSearchEngineIndex = importedData.currentSearchEngineIndex;
+                }
+
+                localStorage.setItem('links', JSON.stringify(links));
+                localStorage.setItem('searchHistory', JSON.stringify(searchHistory));
+                localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
+                localStorage.setItem('linksPerRow', linksPerRow);
+                localStorage.setItem('numberOfRows', numberOfRows);
+                localStorage.setItem('language', currentLanguage);
+                localStorage.setItem('searchEngines', JSON.stringify(searchEngines));
+                localStorage.setItem('currentSearchEngineIndex', currentSearchEngineIndex);
+
+
+                renderLinks();
+                alert(translations.alert_data_imported_success || 'Data imported successfully.');
+                closeSettingsModal();
+            } catch (error) {
+                console.error('Error parsing imported JSON:', error);
+                alert((translations.alert_import_data_parse_error || 'Failed to parse JSON file. The file may be corrupted or in an invalid format.') + `\n${error.message}`);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // 全データの削除
+    function deleteAllData() {
+        if (confirm(translations.confirm_delete_all_data || 'Are you sure you want to delete ALL your saved data (links, history, settings)? This cannot be undone.')) {
+            localStorage.clear(); // Clears all localStorage for this domain
+            links = [];
+            searchHistory = [];
+            sortByClicksEnabled = false;
+            linksPerRow = 5;
+            numberOfRows = 3;
+            currentLanguage = 'en';
+            searchEngines = [
+                { name: 'Google', url: 'https://www.google.com/search?q={searchTerms}', icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%234285F4\'%3E%3Cpath d=\'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z\'/%3E%3Cpath d=\'M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\'/%3E%3C/svg%3E', isDefault: true },
+            ];
+            currentSearchEngineIndex = 0;
+            renderLinks();
+            alert(translations.alert_all_data_deleted || 'All data has been deleted.');
+            closeSettingsModal();
+            loadTranslations(currentLanguage); // Reload default language
+            updateCurrentSearchEngineDisplay();
+        }
+    }
+
+
+    // OpenSearch XMLの解析
+    async function parseOpenSearchXml(xmlContent) {
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlContent, 'application/xml');
+            const os = doc.querySelector('OpenSearchDescription');
+
+            if (!os) {
+                throw new Error(translations.error_invalid_opensearch_xml || 'Invalid OpenSearch XML format.');
+            }
+
+            const shortName = os.querySelector('ShortName')?.textContent;
+            // const description = os.querySelector('Description')?.textContent; // Not currently used
+            const urlTemplate = os.querySelector('Url[type="text/html"]')?.getAttribute('template');
+            const imageUrl = os.querySelector('Image[type*="icon"]')?.textContent; // Prefer image with 'icon' type
+
+            if (!shortName || !urlTemplate) {
+                throw new Error(translations.error_missing_opensearch_data || 'Missing ShortName or URL template in OpenSearch XML.');
+            }
+
+            // Ensure the URL template contains {searchTerms}
+            if (!urlTemplate.includes('{searchTerms}')) {
+                throw new Error(translations.error_opensearch_template_missing_terms || 'OpenSearch URL template must contain {searchTerms}.');
+            }
+
+            const newEngine = {
+                name: shortName,
+                url: urlTemplate,
+                icon: imageUrl || getFaviconUrl(urlTemplate.replace('{searchTerms}', '')), // Fallback to favicon from URL
+                isDefault: false
+            };
+            
+            // Check for duplicates before adding
+            const isDuplicate = searchEngines.some(engine => 
+                engine.url === newEngine.url && engine.name === newEngine.name
+            );
+
+            if (isDuplicate) {
+                alert(translations.alert_duplicate_search_engine || 'This search engine is already added.');
+                return false;
+            }
+
+            searchEngines.push(newEngine);
+            localStorage.setItem('searchEngines', JSON.stringify(searchEngines));
+            renderSearchEngines(); // Re-render the list in settings
+            alert(translations.alert_opensearch_added || `Search engine "${newEngine.name}" added successfully!`);
+            return true;
+
+        } catch (error) {
+            console.error('Error parsing OpenSearch XML:', error);
+            alert((translations.alert_opensearch_parse_error || 'Error parsing OpenSearch XML:') + `\n${error.message}`);
+            return false;
+        }
+    }
+
+    // URLからOpenSearch XMLを追加
+    async function addOpenSearchFromUrl(url) {
+        if (!url) {
+            alert(translations.alert_url_required_for_opensearch || 'Please enter an OpenSearch XML URL.');
+            return;
+        }
+
+        try {
+            // Using a proxy to avoid CORS issues for fetching XML
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const response = await fetch(proxyUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const xmlText = await response.text();
+            await parseOpenSearchXml(xmlText);
+        } catch (error) {
+            console.error('Error fetching OpenSearch XML:', error);
+            alert((translations.alert_fetch_opensearch_failed || 'Failed to fetch OpenSearch XML:') + `\n${error.message}`);
+        }
+    }
+
+    // 検索エンジンリストの描画（設定モーダル内）
+    function renderSearchEngines() {
+        searchEnginesList.innerHTML = '';
+        searchEngines.forEach((engine, index) => {
+            const engineItem = document.createElement('div');
+            engineItem.className = 'setting-item';
+            engineItem.innerHTML = `
+                <label>${engine.name}</label>
+                <div>
+                    ${engine.isDefault ? `<span data-i18n="default_engine_label">(Default)</span>` : `<button class="button-set-default" data-index="${index}" data-i18n="set_as_default_button">Set as Default</button>`}
+                    <button class="delete-button button-delete-engine" data-index="${index}" ${engine.isDefault ? 'disabled' : ''} data-i18n="delete_button">Delete</button>
+                </div>
+            `;
+            searchEnginesList.appendChild(engineItem);
+        });
+
+        // Event listeners for new buttons
+        searchEnginesList.querySelectorAll('.button-set-default').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                setAsDefaultSearchEngine(index);
+            });
+        });
+        searchEnginesList.querySelectorAll('.button-delete-engine').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                if (confirm(translations.confirm_delete_search_engine || 'Are you sure you want to delete this search engine?')) {
+                    deleteSearchEngine(index);
+                }
+            });
+        });
+
+        // Render current search engine in the main search bar
+        updateCurrentSearchEngineDisplay();
+    }
+
+    // デフォルト検索エンジンの設定
+    function setAsDefaultSearchEngine(index) {
+        searchEngines.forEach((engine, i) => {
+            engine.isDefault = (i === index);
+        });
+        currentSearchEngineIndex = index;
+        localStorage.setItem('searchEngines', JSON.stringify(searchEngines));
+        localStorage.setItem('currentSearchEngineIndex', currentSearchEngineIndex);
+        renderSearchEngines(); // Re-render to update default status and buttons
+        alert((translations.alert_default_engine_set || 'New default search engine set.') + ` "${searchEngines[index].name}".`);
+    }
+
+    // 検索エンジンの削除
+    function deleteSearchEngine(index) {
+        if (searchEngines[index].isDefault) {
+            alert(translations.alert_cannot_delete_default_engine || 'Cannot delete the default search engine. Please set another as default first.');
+            return;
+        }
+        searchEngines.splice(index, 1);
+        // Adjust currentSearchEngineIndex if the deleted engine was selected or if index becomes invalid
+        if (currentSearchEngineIndex === index) {
+            currentSearchEngineIndex = 0; // Default to first engine if selected is deleted
+        } else if (currentSearchEngineIndex > index) {
+            currentSearchEngineIndex--; // Adjust index if an earlier engine was deleted
+        }
+        if (searchEngines.length === 0) {
+             // Re-add default Google if all are deleted
+            searchEngines.push({ name: 'Google', url: 'https://www.google.com/search?q={searchTerms}', icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%234285F4\'%3E%3Cpath d=\'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z\'/%3E%3Cpath d=\'M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\'/%3E%3C/svg%3E', isDefault: true });
+            currentSearchEngineIndex = 0;
+        }
+        localStorage.setItem('searchEngines', JSON.stringify(searchEngines));
+        localStorage.setItem('currentSearchEngineIndex', currentSearchEngineIndex);
+        renderSearchEngines();
+        alert(translations.alert_engine_deleted || 'Search engine deleted.');
+    }
+
+    // 現在選択されている検索エンジンの表示を更新
+    function updateCurrentSearchEngineDisplay() {
+        if (searchEngines.length > 0 && searchEngines[currentSearchEngineIndex]) {
+            currentSearchEngineIcon.src = searchEngines[currentSearchEngineIndex].icon || getFaviconUrl(searchEngines[currentSearchEngineIndex].url.replace('{searchTerms}', ''));
+            currentSearchEngineName.textContent = translations[searchEngines[currentSearchEngineIndex].name.toLowerCase().replace(/\s/g, '_') + '_search_engine_name'] || searchEngines[currentSearchEngineIndex].name;
+            currentSearchEngineButton.title = translations.select_search_engine_tooltip + ` (${searchEngines[currentSearchEngineIndex].name})`;
+        } else {
+            // Fallback to default Google if somehow no engines or selected index is invalid
+            currentSearchEngineIndex = 0;
+            localStorage.setItem('currentSearchEngineIndex', currentSearchEngineIndex);
+            updateCurrentSearchEngineDisplay(); // Recurse to set default Google
+        }
+    }
+
+    // 検索エンジン選択ドロップダウンの表示/非表示を切り替え
+    function toggleSearchEngineDropdown() {
+        if (searchEngineSelectorDropdown.classList.contains('visible')) {
+            searchEngineSelectorDropdown.classList.remove('visible');
+            searchEngineSelectorDropdown.innerHTML = '';
+        } else {
+            renderSearchEngineDropdown();
+            searchEngineSelectorDropdown.classList.add('visible');
+            suggestionsBox.classList.remove('visible'); // Close search suggestions if open
+        }
+    }
+
+    // 検索エンジン選択ドロップダウンの内容をレンダリング
+    function renderSearchEngineDropdown() {
+        searchEngineSelectorDropdown.innerHTML = '';
+        searchEngines.forEach((engine, index) => {
+            const option = document.createElement('div');
+            option.className = 'search-engine-option';
+            option.innerHTML = `
+                <img src="${engine.icon || getFaviconUrl(engine.url.replace('{searchTerms}', ''))}" alt="${engine.name}" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%235f6368\\'%3E%3Cpath d=\\'M0 0h24v24H0z\\' fill=\\'none\\'/\\%3E%3Cpath d=\\'M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-.001 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z\\'/%3E%3Cpath d=\\'M12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z\\'/%3E%3C/svg\\>';">
+                <span>${translations[engine.name.toLowerCase().replace(/\s/g, '_') + '_search_engine_name'] || engine.name}</span>
+            `;
+            option.addEventListener('click', () => {
+                currentSearchEngineIndex = index;
+                localStorage.setItem('currentSearchEngineIndex', currentSearchEngineIndex);
+                updateCurrentSearchEngineDisplay();
+                searchEngineSelectorDropdown.classList.remove('visible');
+            });
+            searchEngineSelectorDropdown.appendChild(option);
+        });
+    }
+
+
+    // イベントリスナー
+
+    // 検索入力の変更イベント
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value;
+        if (query.length > 0) {
+            showSuggestions(query);
+        } else {
+            hideSuggestions();
+        }
+    });
+
+    // 検索入力のキーダウンイベント
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            performSearch();
+            e.preventDefault(); // Prevent form submission if applicable
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            navigateSuggestions(1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            navigateSuggestions(-1);
+        }
+    });
+
+    searchButton.addEventListener('click', performSearch);
+
+    // 設定関連
+    settingsButton.addEventListener('click', () => {
+        sortByClicksCheckbox.checked = sortByClicksEnabled;
+        linksPerRowInput.value = linksPerRow;
+        numberOfRowsInput.value = numberOfRows;
+        languageSelector.value = currentLanguage;
+        renderSearchEngines(); // Render search engine list when settings open
+        settingsModal.style.display = 'flex';
+    });
+
+    closeSettingsButton.addEventListener('click', closeSettingsModal);
+
+    languageSelector.addEventListener('change', (event) => {
+        currentLanguage = event.target.value;
+        localStorage.setItem('language', currentLanguage);
+        loadTranslations(currentLanguage);
+    });
+
+    saveSettingsButton.addEventListener('click', () => {
+        sortByClicksEnabled = sortByClicksCheckbox.checked;
+        localStorage.setItem('sortByClicksEnabled', sortByClicksEnabled);
+
+        const newLinksPerRow = parseInt(linksPerRowInput.value);
+        if (newLinksPerRow >= 1 && newLinksPerRow <= 20) {
+            linksPerRow = newLinksPerRow;
+            localStorage.setItem('linksPerRow', linksPerRow);
+        } else {
+            alert(translations.alert_links_per_row_invalid || 'Links per row must be a number between 1 and 20.');
+            linksPerRowInput.value = linksPerRow; // Reset to current valid value
+            return; // Stop saving if validation fails
+        }
+
+        const newNumberOfRows = parseInt(numberOfRowsInput.value);
+        if (newNumberOfRows >= 1 && newNumberOfRows <= 20) {
+            numberOfRows = newNumberOfRows;
+            localStorage.setItem('numberOfRows', numberOfRows);
+        } else {
+            alert(translations.alert_number_of_rows_invalid || 'Number of rows must be a number between 1 and 20.');
+            numberOfRowsInput.value = numberOfRows; // Reset to current valid value
+            return; // Stop saving if validation fails
+        }
+
+        alert(translations.alert_settings_saved || '設定を保存しました');
+        renderLinks(); // Re-render links with new display settings
+        closeSettingsModal();
+    });
+
+    // データ管理
+    exportDataButton.addEventListener('click', exportData);
+    importDataButton.addEventListener('click', () => importFileInput.click());
+    importFileInput.addEventListener('change', importData);
+    deleteAllDataButton.addEventListener('click', deleteAllData);
+
+    // リンクの追加/編集
+    addLinkButton.addEventListener('click', () => openEditModal());
+
+    closeModalButton.addEventListener('click', closeEditModal);
+
+    // Enterキーでリンク保存
+    editModal.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            saveLinkButton.click();
+        }
+    });
+
+    saveLinkButton.addEventListener('click', () => {
+        const url = modalLinkUrl.value.trim();
+        const title = modalLinkTitle.value.trim();
+        const icon = modalLinkIcon.value.trim();
+        const index = modalLinkIndex.value;
+
+        if (!url || !title) {
+            modalLinkUrl.classList.toggle('invalid', !url);
+            modalLinkTitle.classList.toggle('invalid', !title);
+            alert(translations.alert_url_title_required || 'URL and Title are required.');
+            return;
+        }
+
+        if (index === '') {
+            // Add new link
+            if (links.length >= linksPerRow * numberOfRows) {
+                alert(translations.alert_max_links_reached || 'Maximum number of links reached. You can increase the display limit in settings.');
+                return;
+            }
+            links.push({ url, title, icon, clicks: 0 });
+        } else {
+            // Update existing link
+            links[index] = { ...links[index], url, title, icon }; // Preserve clicks
+        }
+        localStorage.setItem('links', JSON.stringify(links));
+        renderLinks();
+        closeEditModal();
+    });
+
+    deleteLinkButton.addEventListener('click', () => {
+        const index = modalLinkIndex.value;
+        if (index !== '' && confirm(translations.confirm_delete_link || 'Are you sure you want to delete this link?')) {
+            links.splice(index, 1);
+            localStorage.setItem('links', JSON.stringify(links));
+            renderLinks();
+            closeEditModal();
+        }
+    });
+
+    fetchTitleButton.addEventListener('click', () => {
+        const url = modalLinkUrl.value.trim();
+        fetchTitleFromUrl(url);
+    });
+
+    // OpenSearch 関連のイベントリスナー
+    addOpensearchUrlButton.addEventListener('click', () => {
+        const url = opensearchUrlInput.value.trim();
+        addOpenSearchFromUrl(url);
+        opensearchUrlInput.value = ''; // Clear input after attempting add
+    });
+
+    importOpensearchFileButton.addEventListener('click', () => opensearchFileInput.click());
+    opensearchFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            parseOpenSearchXml(e.target.result);
+        };
+        reader.readAsText(file);
+        opensearchFileInput.value = ''; // Clear file input
+    });
+
+    // 検索エンジン選択UI関連
+    currentSearchEngineButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent document click from closing immediately
+        toggleSearchEngineDropdown();
+    });
+
+
+    // Click outside to close dropdowns and modals
+    window.addEventListener('click', (event) => {
+        if (event.target === editModal) {
+            closeEditModal();
+        }
+        if (event.target === settingsModal) {
+            closeSettingsModal();
+        }
+        // Close search engine dropdown if click outside
+        if (!currentSearchEngineButton.contains(event.target) && !searchEngineSelectorDropdown.contains(event.target)) {
+            searchEngineSelectorDropdown.classList.remove('visible');
+        }
+        // Close suggestions box if click outside search area
+        if (!searchInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+            hideSuggestions();
+        }
+    });
+
+    // 初期表示
+    loadTranslations(currentLanguage); // Load translations first
+    renderLinks(); // Then render links
+    updateCurrentSearchEngineDisplay(); // Update search engine display
+
+    // Settings inputs to only allow numbers and specific range
+    linksPerRowInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, ''); // Only allow digits
+        if (parseInt(this.value) > 20) this.value = 20;
+        if (parseInt(this.value) < 1) this.value = ''; // Allow empty for typing, but validate on save
+    });
+    numberOfRowsInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, ''); // Only allow digits
+        if (parseInt(this.value) > 20) this.value = 20;
+        if (parseInt(this.value) < 1) this.value = ''; // Allow empty for typing, but validate on save
+    });
+});
