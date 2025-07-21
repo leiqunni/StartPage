@@ -89,7 +89,7 @@ Collected information will be securely managed to prevent unauthorized access, l
 ### 5. Contact
 For requests concerning disclosure, correction, or deletion of personal information, or for questions regarding privacy, please contact:
 
-- Contact Email: your-email@example.com
+- Contact Email: leiqunni at gmail dot com
 
 ### 6. Revision
 This policy may be revised as necessary. Any changes will be announced on this page.
