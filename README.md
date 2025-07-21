@@ -63,3 +63,34 @@ Contributions are welcome! If you have suggestions for improvements or new featu
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
+
+
+## Privacy Policy
+
+leiqunni/StartPage (hereinafter referred to as "this project") recognizes the importance of protecting user privacy and handles personal information according to the following policy.
+
+### 1. Information Collected
+This project may collect the following information from users:
+- Contact information such as name and email address
+- Usage history, cookies, IP address, etc.
+
+### 2. Purpose of Use
+The collected information will be used for the following purposes:
+- Providing and improving services
+- Responding to inquiries
+- Analyzing usage status
+
+### 3. Provision to Third Parties
+Collected information will not be provided to third parties except as required by law.
+
+### 4. Information Management
+Collected information will be securely managed to prevent unauthorized access, leakage, or alteration.
+
+### 5. Contact
+For requests concerning disclosure, correction, or deletion of personal information, or for questions regarding privacy, please contact:
+
+- Contact Email: your-email@example.com
+
+### 6. Revision
+This policy may be revised as necessary. Any changes will be announced on this page.
+

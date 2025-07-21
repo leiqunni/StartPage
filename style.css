@@ -63,6 +63,13 @@ body {
     vertical-align: middle;
 }
 
+.header-link img { /* Style for the new img icon in header links */
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    border-radius: 50%; /* Make favicon round */
+}
+
 .settings-button {
     background: none;
     border: none;
