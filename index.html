@@ -1,151 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://www.google.com https:; connect-src 'self' https:; style-src 'self' 'unsafe-inline'; script-src 'self';">
 	<title data-i18n="new_tab_title">New Tab</title>
 	<link rel="stylesheet" href="style.css">
 	<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234285F4' d='M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z'/%3E%3Cpath fill='%23FBBC05' d='M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z'/%3E%3Cpath fill='%23EA4335' d='M12 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z'/%3E%3Cpath fill='%2334A853' d='M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z'/%3E%3C/svg%3E" type="image/svg+xml">
+	<script src="default.js"></script>
+	<script src="utils.js"></script>
 </head>
-<body style="font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; background-color: #f0f0f0; color: #333;">
-	<div class="header-links" style="position: absolute; top: 15px; right: 15px; display: flex; gap: 15px; align-items: center; z-index: 10;">
-		<a id="header-mail-link" href="https://outlook.live.com/" target="_blank" class="header-link" aria-label="Go to Hotmail" style="display: flex; align-items: center; gap: 5px; color: #5f6368; text-decoration: none; font-size: 14px; padding: 8px 12px; border-radius: 8px; transition: background-color 0.3s ease;">
-			<img id="header-mail-icon" src="" alt="Mail Icon" style="width: 20px; height: 20px; vertical-align: middle;">
-			<span id="header-mail-text" data-i18n="gmail">Hotmail</span>
+<body>
+	<div class="header-links">
+		<a id="header-mail-link" href="#" target="_blank" class="header-link" aria-label="Go to Mail" rel="noopener noreferrer">
+			<img id="header-mail-icon" src="" alt="Mail Icon">
+			<span id="header-mail-text" data-i18n="gmail">Mail</span>
 		</a>
-		<a id="header-image-search-link" href="https://www.bing.com/images/search" target="_blank" class="header-link" aria-label="Go to Bing Image Search" style="display: flex; align-items: center; gap: 5px; color: #5f6368; text-decoration: none; font-size: 14px; padding: 8px 12px; border-radius: 8px; transition: background-color 0.3s ease;">
-			<img id="header-image-search-icon" src="" alt="Image Search Icon" style="width: 20px; height: 20px; vertical-align: middle;">
-			<span id="header-image-search-text" data-i18n="image_search">Bing Images</span>
+		<a id="header-image-search-link" href="#" target="_blank" class="header-link" aria-label="Go to Image Search" rel="noopener noreferrer">
+			<img id="header-image-search-icon" src="" alt="Image Search Icon">
+			<span id="header-image-search-text" data-i18n="image_search">Image Search</span>
 		</a>
-		<button id="settings-button" class="header-link settings-button" aria-label="Open Settings" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #5f6368; font-size: 14px; padding: 8px 12px; border-radius: 8px; transition: background-color 0.3s ease;">
-			<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" style="width: 20px; height: 20px; vertical-align: middle;">
+		<button id="settings-button" class="header-link settings-button" aria-label="Open Settings">
+			<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
 				<path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.09-.76-1.71-1.04l-.36-2.65C14.05 2.1 13.72 2 13.38 2h-2.76c-.34 0-.67.1-.96.25l-.36 2.65c-.62.28-1.19.64-1.71 1.04l-2.49-1c-.22-.09-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.64-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.09-.76 1.71-1.04l.36 2.65c.29.15.62.25.96.25h2.76c.34 0 .67-.1.96-.25l.36-2.65c.62-.28 1.19-.64 1.71-1.04l2.49 1c.22.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
 			</svg>
 			<span data-i18n="settings">Settings</span>
 		</button>
 	</div>
 
-	<div class="container" style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 1280px; padding: 20px; box-sizing: border-box; margin-top: 10vh;">
-		<div class="search-area" style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-			<form class="search-form" style="width: 100%; display: flex; flex-direction: column; align-items: center; position: relative;">
-				<div class="search-input-wrapper" style="position: relative; display: flex; align-items: center; width: 90%; max-width: 746px; border: 1px solid #dfe1e5; border-radius: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background-color: white; padding-left: 10px;">
-					<select id="search-engine-selector" aria-label="Select Search Engine" style="border: none; background-color: transparent; padding: 8px 5px; margin-right: 5px; border-radius: 4px; font-size: 16px; color: #333; cursor: pointer; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="%235f6368" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position: right 8px center; background-size: 12px;">
-						<option value="google">Google</option>
-						<option value="bing">Bing</option>
-						<option value="yahoo">Yahoo</option>
+	<main class="container">
+		<section class="search-area" role="search">
+			<form class="search-form">
+				<div class="search-input-wrapper">
+					<label for="search-engine-selector" class="sr-only">検索エンジンを選択</label>
+					<select id="search-engine-selector" aria-label="Select Search Engine">
 					</select>
-					<input type="search" id="google-search-input" data-i18n-placeholder="search_placeholder" autocomplete="off" aria-label="Search or type a URL" style="flex-grow: 1; padding: 12px 20px; border: none; border-radius: 24px; font-size: 16px; outline: none; background: transparent;">
-					<button id="search-button" type="submit" aria-label="Perform Search" style="background: none; border: none; padding: 10px 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368;">
-						<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+					<label for="search-input" class="sr-only">検索またはURLを入力</label>
+					<input type="search" id="search-input" data-i18n-placeholder="search_placeholder" autocomplete="off" aria-label="Search or type a URL">
+					<button id="search-button" type="submit" aria-label="Perform Search">
+						<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
 							<path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
 						</svg>
 					</button>
 				</div>
-				<div id="suggestions-box" class="suggestions-box" style="position: absolute; top: calc(100% + 5px); width: 90%; max-width: 746px; background-color: white; border: 1px solid #dfe1e5; border-top: none; border-radius: 0 0 8px 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 100; list-style: none; padding: 0; margin-top: -1px; max-height: 300px; overflow-y: auto; display: none;">
+				<ul id="suggestions-box" class="suggestions-box" role="listbox" aria-label="検索候補"></ul>
+			</form>
+		</section>
+
+		<section class="links-section">
+			<h2 class="sr-only">お気に入りリンク</h2>
+			<div class="links-grid" id="links-grid" role="grid" aria-label="お気に入りリンクグリッド">
+			</div>
+		</section>
+	</main>
+
+	<!-- 編集モーダル -->
+	<div id="edit-modal" class="modal" role="dialog" aria-labelledby="edit-modal-title" aria-hidden="true">
+		<div class="modal-content">
+			<button class="close-button" aria-label="Close" type="button">&times;</button>
+			<h2 id="edit-modal-title"></h2>
+			<form class="modal-form">
+				<div class="form-group">
+					<label for="modal-link-url" data-i18n="url_label">URL:</label>
+					<input type="url" id="modal-link-url" required aria-describedby="url-help">
+					<button id="fetch-title-button" type="button" data-i18n-title="fetch_title_button_title">Fetch Title</button>
+					<div id="url-help" class="sr-only">有効なURLを入力してください</div>
+				</div>
+				<div class="form-group">
+					<label for="modal-link-title" data-i18n="title_label">Title:</label>
+					<input type="text" id="modal-link-title" required maxlength="50">
+				</div>
+				<div class="form-group">
+					<label for="modal-link-icon" data-i18n="icon_url_label">Icon URL (Optional):</label>
+					<input type="url" id="modal-link-icon" maxlength="500">
+				</div>
+				<input type="hidden" id="modal-link-index">
+				<div class="modal-buttons">
+					<button id="save-link-button" type="button" class="save-button" data-i18n="save_button" aria-label="Save">Save</button>
+					<button id="delete-link-button" type="button" class="delete-button" data-i18n="delete_button" aria-label="Delete">Delete</button>
 				</div>
 			</form>
 		</div>
-		<div class="links-grid" id="links-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; width: 100%; padding: 8px 0; box-sizing: border-box;">
-		</div>
 	</div>
 
-	<div id="edit-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;">
-		<div class="modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; width: 80%; max-width: 500px; display: flex; flex-direction: column; gap: 8px;">
-			<span class="close-button" aria-label="Close Edit Modal" style="color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-			<h2 data-i18n="edit_link_title" style="margin-top: 0; color: #333; text-align: center; margin-bottom: 15px;">Edit Link</h2>
-			<input type="hidden" id="modal-link-index">
-			<label for="modal-link-url" data-i18n="url_label" style="font-weight: bold; margin-top: 8px; color: #5f6368;">URL:</label>
-			<input type="text" id="modal-link-url" placeholder="https://example.com" aria-label="Link URL" style="width: calc(100% - 20px); padding: 10px; margin-top: 5px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
-			<label for="modal-link-title" data-i18n="title_label" style="font-weight: bold; margin-top: 8px; color: #5f6368;">Title:</label>
-			<div class="title-input-group" style="display: flex; gap: 8px; width: 100%;">
-				<input type="text" id="modal-link-title" placeholder="Site Name" aria-label="Link Title" style="flex-grow: 1; padding: 10px; margin-top: 5px; margin-bottom: 0; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
-				<button id="fetch-title-button" data-i18n-title="fetch_title_button_title" aria-label="Fetch Title from URL" style="background-color: #4285F4; color: white; border: none; border-radius: 4px; cursor: pointer; padding: 8px 12px; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease;">
-					<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-						<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-					</svg>
-				</button>
-			</div>
-			<label for="modal-link-icon" data-i18n="icon_url_label" style="font-weight: bold; margin-top: 8px; color: #5f6368;">Icon URL (Optional):</label>
-			<input type="text" id="modal-link-icon" placeholder="https://example.com/favicon.ico or SVG data" aria-label="Link Icon URL" style="width: calc(100% - 20px); padding: 10px; margin-top: 5px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
-			<div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px;">
-				<button id="save-link-button" data-i18n="save_button" aria-label="Save Link" style="padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease; background-color: #4285F4; color: white;">Save</button>
-				<button id="delete-link-button" class="delete-button" data-i18n="delete_button" aria-label="Delete Link" style="padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease; background-color: #EA4335; color: white;">Delete</button>
-			</div>
-		</div>
-	</div>
+	<!-- 設定モーダル -->
+	<div id="settings-modal" class="modal" role="dialog" aria-labelledby="settings-modal-title" aria-hidden="true">
+		<div class="modal-content">
+			<button class="close-button" id="close-settings-button" aria-label="Close Settings" type="button">&times;</button>
+			<h2 id="settings-modal-title" data-i18n="settings">Settings</h2>
 
-	<div id="settings-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;">
-		<div class="modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; width: 80%; max-width: 500px; display: flex; flex-direction: column; gap: 8px;">
-			<span class="close-button" id="close-settings-button" aria-label="Close Settings Modal" style="color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-			<h2 data-i18n="settings" style="margin-top: 0; color: #333; text-align: center; margin-bottom: 15px;">Settings</h2>
-			<div class="setting-item" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 5px 0; border-bottom: 1px solid #eee;">
-				<label for="sort-by-clicks-checkbox" data-i18n="sort_by_clicks_checkbox_label" style="font-weight: bold; margin-top: 0; flex-grow: 1; color: #5f6368;">Enable sorting by clicks:</label>
-				<input type="checkbox" id="sort-by-clicks-checkbox" aria-label="Enable sorting by clicks" style="width: auto; margin: 0;">
+			<div class="settings-group">
+				<h3 data-i18n="general_settings_heading">General Settings</h3>
+				<div class="form-group">
+					<label for="language-selector" data-i18n="language_selection_label">Language:</label>
+					<select id="language-selector">
+						<option value="en">English</option>
+						<option value="ja">日本語</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="links-per-row-input" data-i18n="links_per_row_label">Links per row:</label>
+					<input type="number" id="links-per-row-input" min="1" max="20" aria-describedby="links-per-row-help">
+					<div id="links-per-row-help" class="sr-only">1から20の間で設定してください</div>
+				</div>
+				<div class="form-group">
+					<label for="number-of-rows-input" data-i18n="number_of_rows_label">Number of rows:</label>
+					<input type="number" id="number-of-rows-input" min="1" max="20" aria-describedby="number-of-rows-help">
+					<div id="number-of-rows-help" class="sr-only">1から20の間で設定してください</div>
+				</div>
+				<div class="form-group-checkbox">
+					<input type="checkbox" id="sort-by-clicks-checkbox">
+					<label for="sort-by-clicks-checkbox" data-i18n="sort_by_clicks_checkbox_label">Enable sorting by clicks:</label>
+				</div>
 			</div>
 
-			<div class="setting-item" style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 5px 0; border-bottom: 1px solid #eee;">
-				<label for="language-selector" data-i18n="language_selection_label" style="font-weight: bold; margin-top: 0; flex-grow: 1; color: #5f6368;">Language:</label>
-				<select id="language-selector" aria-label="Select Language" style="width: calc(100% - 20px); padding: 10px; margin-top: 5px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
-					<option value="en">English</option>
-					<option value="ja">日本語</option>
-					<option value="zh-Hant">繁體中文</option>
-				</select>
+			<div class="settings-group">
+				<h3 data-i18n="json_config_heading">JSON Configuration</h3>
+				<div class="form-group">
+					<label for="json-config-textarea">JSON:</label>
+					<textarea id="json-config-textarea" rows="10" aria-describedby="json-help"></textarea>
+					<div id="json-help" class="sr-only">有効なJSON形式で設定を入力してください</div>
+				</div>
+				<button id="load-json-button" type="button" class="save-button">Load JSON</button>
 			</div>
 
-            <h3 data-i18n="header_links_settings_heading" style="margin-top: 20px; color: #333; text-align: center; margin-bottom: 15px;">Header Links Settings</h3>
-            <div class="setting-item">
-                <label for="header-mail-url" data-i18n="header_mail_url_label">Mail Link URL:</label>
-                <input type="text" id="header-mail-url" placeholder="https://example.com/mail" aria-label="Mail Link URL">
-            </div>
-            <div class="setting-item">
-                <label for="header-mail-title" data-i18n="header_mail_title_label">Mail Link Title:</label>
-                <input type="text" id="header-mail-title" placeholder="Gmail" aria-label="Mail Link Title">
-            </div>
-            <div class="setting-item">
-                <label for="header-image-search-url" data-i18n="header_image_search_url_label">Image Search Link URL:</label>
-                <input type="text" id="header-image-search-url" placeholder="https://example.com/images" aria-label="Image Search Link URL">
-            </div>
-            <div class="setting-item">
-                <label for="header-image-search-title" data-i18n="header_image_search_title_label">Image Search Link Title:</label>
-                <input type="text" id="header-image-search-title" placeholder="Image Search" aria-label="Image Search Link Title">
-            </div>
-
-			<div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px;">
-				<button id="save-settings-button" data-i18n="save_settings_button" aria-label="Save Settings" style="padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease; background-color: #4285F4; color: white;">Save Settings</button>
+			<div class="settings-group">
+				<h3 data-i18n="data_management_heading">Data Management</h3>
+				<div class="form-group">
+					<button id="export-data-button" type="button" class="save-button" data-i18n="export_data_button">Export Data</button>
+					<button id="import-data-button" type="button" class="save-button" data-i18n="import_data_button">Import Data</button>
+					<input type="file" id="import-file-input" accept=".json" style="display: none;" aria-label="データファイルを選択">
+				</div>
 			</div>
-			<h3 data-i18n="data_management_heading" style="margin-top: 20px; color: #333; text-align: center; margin-bottom: 15px;">Data Management</h3>
-			<div class="data-management-buttons" style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;">
-				<button id="export-data-button" data-i18n="export_data_button" aria-label="Export Data" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease;">Export Data</button>
-				<input type="file" id="import-file-input" accept=".json" style="display: none;" aria-label="Import Data File Input">
-				<button id="import-data-button" data-i18n="import_data_button" aria-label="Import Data" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease;">Import Data</button>
+
+			<div class="modal-buttons">
+				<button id="save-settings-button" type="button" class="save-button" data-i18n="save_settings_button" aria-label="Save Settings">Save Settings</button>
 			</div>
 		</div>
 	</div>
 
-	<div id="custom-alert-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;">
-		<div class="modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; width: 80%; max-width: 500px; display: flex; flex-direction: column; gap: 8px;">
-			<span class="close-button" id="close-alert-button" aria-label="Close Alert" style="color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-			<h2 id="alert-title" data-i18n="custom_alert_title" style="margin-top: 0; color: #333; text-align: center; margin-bottom: 15px;">Alert</h2>
-			<p id="alert-message" style="margin-bottom: 15px;"></p>
-			<div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px;">
-				<button id="alert-ok-button" data-i18n="ok_button" aria-label="OK" style="padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease; background-color: #4285F4; color: white;">OK</button>
+	<!-- アラートモーダル -->
+	<div id="custom-alert-modal" class="modal" role="alertdialog" aria-labelledby="alert-title" aria-describedby="alert-message" aria-hidden="true">
+		<div class="modal-content alert-modal">
+			<button class="close-button" id="close-alert-button" aria-label="Close Alert" type="button">&times;</button>
+			<h2 id="alert-title" data-i18n="custom_alert_title">Alert</h2>
+			<p id="alert-message"></p>
+			<div class="modal-buttons">
+				<button id="alert-ok-button" type="button" class="save-button" data-i18n="ok_button" aria-label="OK">OK</button>
 			</div>
 		</div>
 	</div>
 
-	<div id="custom-confirm-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;">
-		<div class="modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; width: 80%; max-width: 500px; display: flex; flex-direction: column; gap: 8px;">
-			<span class="close-button" id="close-confirm-button" aria-label="Close Confirmation" style="color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-			<h2 id="confirm-title" data-i18n="custom_confirm_title" style="margin-top: 0; color: #333; text-align: center; margin-bottom: 15px;">Confirm</h2>
-			<p id="confirm-message" style="margin-bottom: 15px;"></p>
-			<div class="modal-buttons" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px;">
-				<button id="confirm-cancel-button" class="delete-button" data-i18n="cancel_button" aria-label="Cancel" style="padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease; background-color: #EA4335; color: white;">Cancel</button>
-				<button id="confirm-ok-button" data-i18n="ok_button" aria-label="OK" style="padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background-color 0.2s ease; background-color: #4285F4; color: white;">OK</button>
+	<!-- 確認モーダル -->
+	<div id="custom-confirm-modal" class="modal" role="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message" aria-hidden="true">
+		<div class="modal-content confirm-modal">
+			<button class="close-button" id="close-confirm-button" aria-label="Close Confirmation" type="button">&times;</button>
+			<h2 id="confirm-title" data-i18n="custom_confirm_title">Confirm</h2>
+			<p id="confirm-message"></p>
+			<div class="modal-buttons">
+				<button id="confirm-cancel-button" type="button" class="delete-button" data-i18n="cancel_button" aria-label="Cancel">Cancel</button>
+				<button id="confirm-ok-button" type="button" class="save-button" data-i18n="ok_button" aria-label="OK">OK</button>
 			</div>
 		</div>
 	</div>
 
-   <script src="script.js"></script>
+	<!-- スクリーンリーダー用の非表示要素 -->
+	<div class="sr-only" aria-live="polite" aria-atomic="true" id="status-message"></div>
 
+	<script src="script.js"></script>
 </body>
 </html>

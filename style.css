@@ -5,24 +5,32 @@
     --color-text-medium: #5f6368;
     --color-background-light: #f0f0f0;
     --color-hover-light: #e8e8e8;
-    --border-radius-sm: 4px;
-    --border-radius-md: 8px;
-    --border-radius-lg: 20px;
-    --spacing-xs: 5px;
-    --spacing-sm: 8px;
-    --spacing-md: 15px;
-    --spacing-lg: 20px;
-    --box-shadow-sm: 0 2px 5px rgba(0,0,0,0.1); /* Consistent shadow */
-    --box-shadow-md: 0 4px 8px rgba(0,0,0,0.1); /* Consistent shadow */
-    --box-shadow-lg: 0 5px 15px rgba(0,0,0,0.3); /* Consistent shadow */
+    --color-focus: #1a73e8;
+    --border-radius: 8px;
+    --spacing: 8px;
+    --box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    --box-shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+    --transition: all 0.2s ease-in-out;
+}
+
+/* スクリーンリーダー専用要素 */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
     min-height: 100vh;
     background-color: var(--color-background-light);
@@ -31,12 +39,28 @@ body {
     overflow-y: auto;
 }
 
+/* フォーカス管理 */
+*:focus {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* ヘッダーリンク */
 .header-links {
     position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
+    top: 15px;
+    right: 15px;
     display: flex;
-    gap: var(--spacing-md);
+    gap: 15px;
     align-items: center;
     z-index: 10;
 }
@@ -44,17 +68,27 @@ body {
 .header-link {
     display: flex;
     align-items: center;
-    grid-gap: 5px;
+    gap: 5px;
     color: var(--color-text-medium);
     text-decoration: none;
     font-size: 14px;
-    padding: var(--spacing-sm) 12px;
-    border-radius: var(--border-radius-md);
-    transition: background-color 0.3s ease;
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-.header-link:hover {
+.header-link:hover,
+.header-link:focus {
     background-color: var(--color-hover-light);
+}
+
+.header-link img {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
 }
 
 .header-link svg {
@@ -63,45 +97,33 @@ body {
     vertical-align: middle;
 }
 
-.header-link img { /* Style for the new img icon in header links */
-    width: 20px;
-    height: 20px;
-    vertical-align: middle;
-    border-radius: 50%; /* Make favicon round */
-}
-
-.settings-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
+/* メインコンテナ */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     max-width: 1280px;
-    padding: var(--spacing-lg);
+    padding: 20px;
     box-sizing: border-box;
     margin-top: 10vh;
 }
 
+/* 検索エリア */
 .search-area {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 20px;
 }
 
-/* Search input wrapper and form */
 .search-form {
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative; /* For suggestions-box positioning */
+    position: relative;
 }
 
 .search-input-wrapper {
@@ -112,9 +134,15 @@ body {
     max-width: 746px;
     border: 1px solid #dfe1e5;
     border-radius: 24px;
-    box-shadow: var(--box-shadow-sm); /* Using CSS variable */
+    box-shadow: var(--box-shadow-sm);
     background-color: white;
     padding-left: 10px;
+    transition: var(--transition);
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--color-focus);
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.2);
 }
 
 #search-engine-selector {
@@ -122,7 +150,7 @@ body {
     background-color: transparent;
     padding: 8px 5px;
     margin-right: 5px;
-    border-radius: var(--border-radius-sm);
+    border-radius: 4px;
     font-size: 16px;
     color: var(--color-text-dark);
     cursor: pointer;
@@ -134,13 +162,10 @@ body {
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 12px;
+    min-width: 80px;
 }
 
-#search-engine-selector:hover {
-    background-color: var(--color-hover-light);
-}
-
-#google-search-input {
+#search-input {
     flex-grow: 1;
     padding: 12px 20px;
     border: none;
@@ -148,9 +173,10 @@ body {
     font-size: 16px;
     outline: none;
     background: transparent;
+    min-width: 0; /* flexアイテムの最小幅を0に */
 }
 
-#google-search-input::placeholder {
+#search-input::placeholder {
     color: #9aa0a6;
 }
 
@@ -163,6 +189,13 @@ body {
     align-items: center;
     justify-content: center;
     color: var(--color-text-medium);
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+#search-button:hover,
+#search-button:focus {
+    background-color: var(--color-hover-light);
 }
 
 #search-button svg {
@@ -170,36 +203,115 @@ body {
     height: 24px;
 }
 
+/* サジェストボックス */
+.suggestions-box {
+    position: absolute;
+    top: calc(100% + 5px);
+    width: 90%;
+    max-width: 746px;
+    background-color: white;
+    border: 1px solid #dfe1e5;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: var(--box-shadow);
+    z-index: 100;
+    list-style: none;
+    padding: 0;
+    margin-top: -1px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestions-box.visible {
+    display: block;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px;
+    cursor: pointer;
+    color: var(--color-text-dark);
+    gap: 12px;
+    border-radius: 4px;
+    margin: 2px 4px;
+    transition: var(--transition);
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected,
+.suggestion-item:focus {
+    background-color: var(--color-hover-light);
+}
+
+.suggestion-item .icon-history,
+.suggestion-item .icon-search {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-medium);
+}
+
+.suggestion-item span {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.suggestion-item .delete-history {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 5px;
+    border-radius: 4px;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.suggestion-item .delete-history:hover,
+.suggestion-item .delete-history:focus {
+    color: #666;
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* リンクグリッド */
+.links-section {
+    width: 100%;
+}
+
 .links-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    grid-gap: var(--spacing-sm); /* Using CSS variable */
+    grid-gap: 15px;
     width: 100%;
-    padding: var(--spacing-sm) 0;
+    padding: 15px 0;
     box-sizing: border-box;
 }
 
-/* Responsive adjustments for links-grid */
 @media (min-width: 768px) {
     .links-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        grid-gap: var(--spacing-md);
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-gap: var(--spacing);
     }
 }
 
 @media (min-width: 1024px) {
     .links-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        grid-gap: var(--spacing-lg);
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-gap: var(--spacing);
     }
 }
-
 
 .link-button {
     background-color: white;
     border: 1px solid #ddd;
-    border-radius: var(--border-radius-md);
-    padding: var(--spacing-md) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    padding: var(--spacing);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -208,14 +320,15 @@ body {
     color: var(--color-text-dark);
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: var(--transition);
     position: relative;
     height: 120px;
     box-sizing: border-box;
 }
 
-.link-button:hover {
-    box-shadow: var(--box-shadow-md); /* Using CSS variable */
+.link-button:hover,
+.link-button:focus {
+    box-shadow: var(--box-shadow);
     transform: translateY(-2px);
 }
 
@@ -224,7 +337,7 @@ body {
     height: 48px;
     border-radius: 50%;
     object-fit: contain;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing);
 }
 
 .link-button .title {
@@ -235,49 +348,52 @@ body {
     width: 100%;
     padding: 0 5px;
     box-sizing: border-box;
-}
-
-.link-button.add-button {
-    font-size: 40px;
-    color: var(--color-text-medium);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f8f8f8;
-    border-style: dashed;
-    border-color: #ccc;
-}
-
-.link-button.add-button:hover {
-    background-color: #eee;
-    color: var(--color-primary);
+    line-height: 1.4;
 }
 
 .link-button .edit-icon {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    padding: 3px;
+    width: 20px;
+    height: 20px;
+    display: none;
+    opacity: 0.5;
+    transition: var(--transition);
+    border-radius: 4px;
+    padding: 2px;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.link-button:hover .edit-icon {
+.link-button:hover .edit-icon,
+.link-button:focus-within .edit-icon {
+    display: block;
     opacity: 1;
 }
 
-.link-button .edit-icon svg {
-    width: 18px;
-    height: 18px;
-    fill: var(--color-text-medium);
+.edit-icon:hover,
+.edit-icon:focus {
+    background-color: rgba(0,0,0,0.1);
+    opacity: 1;
 }
 
+.link-button.add-button {
+    font-size: 48px;
+    color: #b0b0b0;
+    justify-content: center;
+    align-items: center;
+    border-style: dashed;
+    transition: var(--transition);
+}
+
+.add-button:hover,
+.add-button:focus {
+    background-color: #f8f8f8;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* モーダル */
 .modal {
     display: none;
     position: fixed;
@@ -290,261 +406,335 @@ body {
     background-color: rgba(0,0,0,0.4);
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(2px);
 }
 
 .modal-content {
     background-color: #fefefe;
     margin: auto;
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--box-shadow-lg); /* Using CSS variable */
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     position: relative;
-    width: 80%;
+    width: 90%;
     max-width: 500px;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 16px;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
-/* Responsive adjustments for modal-content */
-@media (max-width: 600px) {
-    .modal-content {
-        width: 95%;
-        padding: var(--spacing-md);
-    }
+.modal-content.alert-modal {
+    max-width: 400px;
 }
 
-.modal-content h2,
-.modal-content h3 {
+.modal-content.confirm-modal {
+    max-width: 500px;
+}
+
+.modal-content h2 {
     margin-top: 0;
     color: var(--color-text-dark);
     text-align: center;
-    margin-bottom: var(--spacing-md);
-}
-
-.modal-content label {
-    font-weight: bold;
-    margin-top: var(--spacing-sm);
-    color: var(--color-text-medium);
-}
-
-.modal-content input[type="text"],
-.modal-content input[type="number"],
-.modal-content select {
-    width: calc(100% - 20px);
-    padding: 10px;
-    margin-top: var(--spacing-xs);
-    margin-bottom: var(--spacing-sm);
-    border: 1px solid #ccc;
-    border-radius: var(--border-radius-sm);
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-.title-input-group {
-    display: flex;
-    gap: var(--spacing-sm);
-    width: 100%;
-}
-
-.title-input-group input {
-    flex-grow: 1;
-    margin-bottom: 0;
-}
-
-#fetch-title-button {
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-}
-
-#fetch-title-button:hover {
-    background-color: #357ae8;
-}
-
-#fetch-title-button svg {
-    fill: white;
-    width: 20px;
-    height: 20px;
-}
-
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-md);
-}
-
-.modal-buttons button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease;
-}
-
-#save-link-button,
-#save-settings-button,
-#alert-ok-button, /* Added for custom alert */
-#confirm-ok-button /* Added for custom confirm */ {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-#save-link-button:hover,
-#save-settings-button:hover,
-#alert-ok-button:hover, /* Added for custom alert */
-#confirm-ok-button:hover /* Added for custom confirm */ {
-    background-color: #357ae8;
-}
-
-.delete-button,
-#confirm-cancel-button /* Added for custom confirm */ {
-    background-color: var(--color-tertiary);
-    color: white;
-}
-
-.delete-button:hover,
-#confirm-cancel-button:hover /* Added for custom confirm */ {
-    background-color: #cc0000;
+    margin-bottom: 20px;
+    font-size: 24px;
 }
 
 .close-button {
     color: #aaa;
     position: absolute;
-    top: 10px;
+    top: 15px;
     right: 20px;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    border: none;
+    background: none;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
 }
 
 .close-button:hover,
 .close-button:focus {
-    color: #333;
-    text-decoration: none;
-    cursor: pointer;
+    color: #000;
+    background-color: rgba(0,0,0,0.1);
 }
 
-.setting-item {
+/* フォーム要素 */
+.form-group {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: var(--spacing-sm);
-    padding: var(--spacing-xs) 0;
-    border-bottom: 1px solid #eee;
-}
-
-.setting-item:last-of-type {
-    border-bottom: none;
-}
-
-.setting-item label {
-    margin-top: 0;
-    flex-grow: 1;
-}
-
-.setting-item input[type="checkbox"] {
-    width: auto;
-    margin: 0;
-}
-
-.data-management-buttons {
-    display: flex;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-md);
-}
-
-.data-management-buttons button {
-    background-color: #6c757d;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.2s ease;
-}
-
-.data-management-buttons button:hover {
-    background-color: #5a6268;
-}
-
-/* Suggestions Box */
-.suggestions-box {
-    position: absolute;
-    /* Adjusted top to be relative to the .search-form container */
-    top: calc(100% + 5px); /* Position below the search input wrapper with a small gap */
-    width: 90%;
-    max-width: 746px;
-    background-color: white;
-    border: 1px solid #dfe1e5;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    box-shadow: var(--box-shadow-md); /* Using CSS variable */
-    z-index: 100;
-    list-style: none;
-    padding: 0;
-    margin-top: -1px; /* Overlap border with search input */
-    max-height: 300px;
-    overflow-y: auto;
-    display: none; /* Hidden by default */
-}
-
-.suggestions-box.visible {
-    display: block;
-}
-
-.suggestion-item {
-    display: flex;
-    align-items: center;
-    padding: 6px 20px;
-    cursor: pointer;
-    color: var(--color-text-dark);
+    flex-direction: column;
+    margin-bottom: 20px;
     gap: 8px;
 }
 
-.suggestion-item:hover,
-.suggestion-item.selected {
-    background-color: #f0f0f0;
+.form-group label {
+    font-weight: 600;
+    color: var(--color-text-dark);
+    font-size: 14px;
 }
 
-.suggestion-item .icon-history,
-.suggestion-item .icon-search {
-    flex-shrink: 0;
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+.form-group input[type="number"] {
+    width: 120px;
+}
+
+.form-group textarea {
+    width: 100%;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group button {
+    margin-top: 8px;
+    padding: 10px 16px;
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: var(--transition);
+    align-self: flex-start;
+}
+
+.form-group button:hover,
+.form-group button:focus {
+    background-color: #3b78e8;
+    transform: translateY(-1px);
+}
+
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.form-group-checkbox input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    color: var(--color-text-medium);
+    margin: 0;
 }
 
-.suggestion-item .text-content {
-    flex-grow: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.suggestion-item .delete-history-btn {
-    background: none;
-    border: none;
-    color: var(--color-text-medium);
-    font-size: 18px;
+.form-group-checkbox label {
+    font-weight: 600;
+    margin: 0;
     cursor: pointer;
-    padding: 0 5px;
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
 }
 
-.suggestion-item .delete-history-btn:hover {
-    opacity: 1;
-    color: var(--color-tertiary);
+/* ボタン */
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.save-button,
+.delete-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: var(--transition);
+    min-width: 80px;
+}
+
+.save-button {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.save-button:hover,
+.save-button:focus {
+    background-color: #3b78e8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+}
+
+.delete-button {
+    background-color: var(--color-tertiary);
+    color: white;
+}
+
+.delete-button:hover,
+.delete-button:focus {
+    background-color: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+}
+
+.confirm-modal .modal-buttons .delete-button {
+    background-color: #f0f0f0;
+    color: var(--color-text-dark);
+}
+
+.confirm-modal .modal-buttons .delete-button:hover,
+.confirm-modal .modal-buttons .delete-button:focus {
+    background-color: #e0e0e0;
+}
+
+/* 設定グループ */
+.settings-group {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.settings-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.settings-group h3 {
+    color: var(--color-text-dark);
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .container {
+        margin-top: 5vh;
+        padding: 15px;
+    }
+    
+    .header-links {
+        top: 10px;
+        right: 10px;
+        gap: 10px;
+    }
+    
+    .header-link {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    
+    .header-link span {
+        display: none;
+    }
+    
+    .search-input-wrapper {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .modal-buttons {
+        justify-content: center;
+    }
+    
+    .save-button,
+    .delete-button {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* ハイコントラストモード対応 */
+@media (prefers-contrast: high) {
+    :root {
+        --color-text-dark: #000;
+        --color-text-medium: #333;
+        --border-color: #000;
+    }
+    
+    .link-button {
+        border-color: #000;
+    }
+    
+    .suggestion-item:hover,
+    .suggestion-item.selected {
+        background-color: #000;
+        color: #fff;
+    }
+}
+
+/* モーション軽減設定への対応 */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .link-button:hover {
+        transform: none;
+    }
+    
+    .save-button:hover,
+    .delete-button:hover {
+        transform: none;
+    }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-text-dark: #e8eaed;
+        --color-text-medium: #9aa0a6;
+        --color-background-light: #202124;
+        --color-hover-light: #303134;
+    }
+    
+    body {
+        background-color: var(--color-background-light);
+        color: var(--color-text-dark);
+    }
+    
+    .search-input-wrapper,
+    .link-button,
+    .suggestions-box,
+    .modal-content {
+        background-color: #303134;
+        border-color: #5f6368;
+        color: var(--color-text-dark);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        background-color: #303134;
+        border-color: #5f6368;
+        color: var(--color-text-dark);
+    }
+    
+    .form-group input::placeholder {
+        color: var(--color-text-medium);
+    }
 }

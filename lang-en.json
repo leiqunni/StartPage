@@ -39,9 +39,14 @@
     "alert_import_links_corrupted": "Link data is corrupted.",
     "alert_import_failed": "Import failed",
     "alert_data_exported": "Data exported successfully.",
-    "alert_invalid_url_format": "Invalid URL format. Please enter a valid URL.",
-    "custom_alert_title": "Alert",
-    "custom_confirm_title": "Confirmation",
+    "alert_invalid_url_format": "Invalid URL format.",
+    "history_icon_title": "Search History",
+    "search_icon_title": "Search Suggestion",
     "ok_button": "OK",
-    "cancel_button": "Cancel"
+    "cancel_button": "Cancel",
+    "custom_alert_title": "Alert",
+    "custom_confirm_title": "Confirm",
+    "general_settings_heading": "General Settings",
+    "json_config_heading": "JSON Configuration",
+    "alert_settings_loaded": "Settings loaded successfully from JSON."
 }
